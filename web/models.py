@@ -41,9 +41,16 @@ class IdcScan(models.Model):
         btn_str = '<a class="btn btn-xs btn-danger" href="{}">' \
                   '<input name="通过审核"' \
                   'type="button" id="passButton" ' \
-                  'onclick="alert("hello,word")" '\
+                  'btn.disabled ture' \
                   'title="审核" value="通过审核">' \
                   '</a>'
 #        return format_html(btn_str, '/pass_audit/?{}'.format(parameter_str))
         return format_html(btn_str,'/dashboard')
     pass_audit_str2.short_description = '通过审核'
+
+class Active_ip(models.Model):
+    id = models.AutoField("序列号",primary_key=True)
+    ip = models.CharField("服务器ip", max_length=2000)
+    state = models.BooleanField('状态', choices=((0, '离线'), (1, '在线')),default=0)
+    create_time = models.DateTimeField("创建时间",auto_now_add=True)
+    purpose = models.CharField("用途", max_length=2000)

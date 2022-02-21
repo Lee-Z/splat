@@ -149,7 +149,7 @@ SIMPLEUI_LOADING = False
 #菜单设置
 SIMPLEUI_CONFIG = {
     'system_keep': False,
-    'menu_display': ['Simpleui', '多级菜单测试', '权限认证', '动态菜单测试'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
+    'menu_display': ['Simpleui', '服务器扫描','多级菜单测试', '权限认证', '动态菜单测试'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
     'dynamic': True,    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时动态展示菜单内容
     'menus': [{
         'name': 'Simpleui',
@@ -165,6 +165,14 @@ SIMPLEUI_CONFIG = {
             'url': 'auth/user/'
         }]
     }, {
+        'name': '服务器扫描',
+        'icon': 'far fa-surprise',
+        'models': [{
+            'name': '客户端列表',
+            'icon': 'fa fa-user',
+            'url': 'web/active_ip'
+        }]
+    },{
         # 自2021.02.01+ 支持多级菜单，models 为子菜单名
         'name': '多级菜单测试',
         'icon': 'fa fa-file',

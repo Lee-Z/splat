@@ -1,9 +1,16 @@
 from django.contrib import admin
-from .models import *
+from web import models
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils.html import format_html
 
+
+
+class Agent(admin.ModelAdmin):
+    list_display = ['id', 'ip','state','create_time', 'purpose']
+    search_fields = ['ip', 'state','create_time']
+#    list_editable = ['idc_ip','idc_status']
+    list_filter = ['create_time']
 
 # Register your models here.
 class Idc(admin.ModelAdmin):
@@ -186,6 +193,7 @@ class Idc(admin.ModelAdmin):
 admin.site.site_header = '运维安全平台'  # 设置header
 admin.site.site_title = '运维安全后台'   # 设置title
 admin.site.index_title = '运维安全后台'
-admin.site.register(IdcScan,Idc)
+admin.site.register(models.IdcScan,Idc)
+admin.site.register(models.Active_ip,Agent)
 
 
