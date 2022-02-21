@@ -51,6 +51,7 @@ class IdcScan(models.Model):
 class Active_ip(models.Model):
     id = models.AutoField("序列号",primary_key=True)
     ip = models.CharField("服务器ip", max_length=2000)
-    state = models.BooleanField('状态', choices=((0, '离线'), (1, '在线')),default=0)
+    state = models.BooleanField('状态', choices=((0, '离线'), (1, '在线')),default=1)
     create_time = models.DateTimeField("创建时间",auto_now_add=True)
     purpose = models.CharField("用途", max_length=2000)
+

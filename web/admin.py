@@ -7,11 +7,21 @@ from django.utils.html import format_html
 
 
 class Agent(admin.ModelAdmin):
-    list_display = ['id', 'ip','state','create_time', 'purpose']
+    list_display = ['id', 'ip','statusColored','create_time', 'purpose']
     search_fields = ['ip', 'state','create_time']
 #    list_editable = ['idc_ip','idc_status']
     list_filter = ['create_time']
 
+
+    def statusColored(self, obj):
+        if obj.state == 0:
+            return format_html('<span style="color:red">{}</span>', '离线')
+        else:
+            return format_html('<span style="color:green">{}</span>', '在线')
+
+    statusColored.short_description = "状态"
+    #将上面的列可排序（显示和其他列头一样）
+    statusColored.admin_order_field = 'state'
 # Register your models here.
 class Idc(admin.ModelAdmin):
     list_display = ['idc_id', 'idc_ip','idc_command','idc_status', 'idc_time','pass_audit_str','idc_value','pass_audit_str2']
