@@ -7,21 +7,67 @@ from django.utils.html import format_html
 
 
 class Agent(admin.ModelAdmin):
-    list_display = ['id', 'ip','statusColored','create_time', 'purpose']
+    list_display = ['id', 'ip','statusColored','create_time', 'purpose','pass_audit_str2']
     search_fields = ['ip', 'state','create_time']
 #    list_editable = ['idc_ip','idc_status']
     list_filter = ['create_time']
 
-
     def statusColored(self, obj):
-        if obj.state == 0:
-            return format_html('<span style="color:red">{}</span>', '离线')
-        else:
+        if obj.status == 1:
             return format_html('<span style="color:green">{}</span>', '在线')
-
+        elif obj.status ==2:
+            return format_html('<span style="color:green">{}</span>', '未注册')
+        else:
+            return format_html('<span style="color:red">{}</span>', '离线')
     statusColored.short_description = "状态"
     #将上面的列可排序（显示和其他列头一样）
-    statusColored.admin_order_field = 'state'
+    statusColored.admin_order_field = 'status'
+
+    #页面上面添加按钮
+    actions = ['custom_button']
+    def custom_button(self, request, queryset):
+        print(queryset)
+        if request.method == 'POST':
+            filed_id = request.POST.get('_selected_action')
+
+            models.Active_ip.objects.filter(id=filed_id, status=2).update(status=1)
+            status_id = models.Active_ip.objects.filter(id=filed_id).values_list('status')
+            print(status_id[0][0])
+            if status_id[0][0] == 2:
+                models.Active_ip.objects.filter(id=filed_id, status=2).update(status=1)
+                messages.add_message(request, messages.SUCCESS, "注册成功")
+            elif status_id[0][0] == 1:
+                messages.add_message(request, messages.SUCCESS, "已在线状态")
+            else:
+                messages.add_message(request, messages.SUCCESS, "离线状态")
+
+    # 显示的文本，与django admin一致
+    custom_button.short_description = '注册'
+    # icon，参考element-ui icon与https://fontawesome.com
+    # custom_button.icon = 'fas fa-audio-description'
+
+    # 指定element-ui的按钮类型，参考https://element.eleme.cn/#/zh-CN/component/button
+    custom_button.type = 'danger'
+
+    # 给按钮追加自定义的颜色
+    custom_button.style = 'color:black;'
+    custom_button.confirm = '是否确定注册'
+
+    def make_copy(self, request, queryset):
+        pass
+    make_copy.short_description = '复制员工'
+
+#执行右边按钮
+    def function(request):
+        if request.POST:
+            if 'update' in request.POST:
+                print("update 更新")
+            else:
+                print("delete 删除")
+            return "hello word"
+
+
+
 # Register your models here.
 class Idc(admin.ModelAdmin):
     list_display = ['idc_id', 'idc_ip','idc_command','idc_status', 'idc_time','pass_audit_str','idc_value','pass_audit_str2']
@@ -192,9 +238,6 @@ class Idc(admin.ModelAdmin):
             }]
         }]
     }
-
-
-
 
 
 

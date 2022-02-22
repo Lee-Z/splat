@@ -25,8 +25,9 @@ def test_ajax(request):
             ip = request.META.get("REMOTE_ADDR")
             pt = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
             #新增和更新数据,如有更新，如无创建 (defaults是用来更新的， kwargs是用来查询的)
-            models.Active_ip.objects.update_or_create(defaults={'state': 1},ip=ip)
+            # models.Active_ip.objects.update_or_create(defaults={'status': 2},ip=ip)
             # models.Active_ip.objects.filter(ip=ip).update(inset_time=pt)
+            models.Active_ip.objects.get_or_create(defaults={'status': 2},ip=ip)
             print("插入数据完成")
         return HttpResponse(ip)
     else:

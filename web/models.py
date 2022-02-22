@@ -51,7 +51,40 @@ class IdcScan(models.Model):
 class Active_ip(models.Model):
     id = models.AutoField("序列号",primary_key=True)
     ip = models.CharField("服务器ip", max_length=2000)
-    state = models.BooleanField('状态', choices=((0, '离线'), (1, '在线')),default=1)
+    state = models.BooleanField('状态', choices=((0, '离线'), (1, '在线')),default=0)
     create_time = models.DateTimeField("创建时间",auto_now_add=True)
     purpose = models.CharField("用途", max_length=2000)
+    statusChoices = (
+        (0,'离线'),
+        (1,'在线'),
+        (2,'未注册')
+    )
+    status = models.IntegerField( choices=statusChoices,verbose_name='状态' , default=0 )
 
+    def pass_audit_str2(self):
+        parameter_str = 'id={}&status={}'.format(str(self.id), str(self.status))
+        color_code = ''
+        btn_str = '<a class="btn btn-xs btn-danger" href="{}">' \
+                  '<input name="通过审核"' \
+                  'type="button" id="passButton" ' \
+                  'title="审核" value="通过审核">' \
+                  '</a>'
+        # btn_str = '<a class="btn btn-xs btn-danger" href="{}">' \
+        #           '<input name="审核"' \
+        #           'type="button" id="passButton" ' \
+        #           'btn.disabled ture' \
+        #           'title="审核" value="编辑">' \
+        #           '</a>' \
+        #           '<a class="btn btn-xs btn-danger" href="{}">' \
+        #           '<input name="更新"' \
+        #           'type="button" id="update"' \
+        #           'title="审核" value="更新">' \
+        #           '</a>'
+        # btn_test = '<button type="button" class="btn btn-info" name="del">删除</button> ' \
+        #            '<button type="button" class="btn btn-info" name="update">更新</button>'
+
+
+        #        return format_html(btn_str, '/pass_audit/?{}'.format(parameter_str))
+        return format_html(btn_str,'/dashboard')
+    pass_audit_str2.short_description = '操作'
+    pass_audit_str2.admin_order_field = 'status'
