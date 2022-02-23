@@ -3,11 +3,11 @@ from web import models
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils.html import format_html
-
+from django.utils.safestring import mark_safe
 
 
 class Agent(admin.ModelAdmin):
-    list_display = ['id', 'ip','statusColored','create_time', 'purpose','pass_audit_str2']
+    list_display = ['ip','statusColored','create_time','operate']
     search_fields = ['ip', 'state','create_time']
 #    list_editable = ['idc_ip','idc_status']
     list_filter = ['create_time']
@@ -24,12 +24,12 @@ class Agent(admin.ModelAdmin):
     statusColored.admin_order_field = 'status'
 
     #页面上面添加按钮
-    actions = ['custom_button']
+    actions = ['custom_button','pro_scan']
     def custom_button(self, request, queryset):
         print(queryset)
         if request.method == 'POST':
             filed_id = request.POST.get('_selected_action')
-
+            print(filed_id)
             models.Active_ip.objects.filter(id=filed_id, status=2).update(status=1)
             status_id = models.Active_ip.objects.filter(id=filed_id).values_list('status')
             print(status_id[0][0])
@@ -40,31 +40,48 @@ class Agent(admin.ModelAdmin):
                 messages.add_message(request, messages.SUCCESS, "已在线状态")
             else:
                 messages.add_message(request, messages.SUCCESS, "离线状态")
-
     # 显示的文本，与django admin一致
     custom_button.short_description = '注册'
     # icon，参考element-ui icon与https://fontawesome.com
     # custom_button.icon = 'fas fa-audio-description'
-
     # 指定element-ui的按钮类型，参考https://element.eleme.cn/#/zh-CN/component/button
     custom_button.type = 'danger'
-
     # 给按钮追加自定义的颜色
     custom_button.style = 'color:black;'
     custom_button.confirm = '是否确定注册'
+    def pro_scan(self, request, queryset):
+        if request.method == 'POST':
+            print(queryset[1])
+            print(queryset[2])
+        return queryset
+    pro_scan.short_description = '进程扫描'
+    pro_scan.type = 'danger'
+    # 给按钮追加自定义的颜色
+    pro_scan.style = 'color:black;'
+    pro_scan.confirm = '是否确定扫描'
 
-    def make_copy(self, request, queryset):
-        pass
-    make_copy.short_description = '复制员工'
+    @admin.display(description='操作', ordering='id')
+    def operate(self, obj):
+        #注释的btn1 为弹出提示
+        # info_msg = f'这条狗的名字是：{obj.id} 年龄是：{obj.status}'
+        # simpleui 用的elementui ,可以使用el的类修改默认样式
+        # btn1 = f"""<button onclick="self.parent.app.$msgbox('{info_msg}')"
+        #                     class="el-button el-button--warning el-button--small">编辑</button>"""
+        change = '{"name": "%s", "icon": "fas fa-user-tie", "url": "/admin/web/active_ip/%d/change/"}' % (obj.id, obj.id)
+        btn1 = f"""<button onclick='self.parent.app.openTab({change})'
+                             class='el-button el-button--warning el-button--small'>编辑</button>"""
+        # 在新标签中打开修改界面，url可以随意指定。自己可以多做尝试
+        data = '{"name": "%s", "icon": "fas fa-user-tie", "url": "/admin/web/active_ip/%d/delete/"}' % (obj.id, obj.id)
+        btn2 = f"""<button onclick='self.parent.app.openTab({data})'
+                             class='el-button el-button--danger el-button--small'>删除</button>"""
+        return mark_safe(f"<div>{btn1} {btn2}</div>")
 
-#执行右边按钮
-    def function(request):
-        if request.POST:
-            if 'update' in request.POST:
-                print("update 更新")
-            else:
-                print("delete 删除")
-            return "hello word"
+
+
+
+
+
+
 
 
 
@@ -238,6 +255,16 @@ class Idc(admin.ModelAdmin):
             }]
         }]
     }
+
+
+
+
+
+
+
+
+
+
 
 
 

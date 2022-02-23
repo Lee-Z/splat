@@ -44,7 +44,7 @@ class IdcScan(models.Model):
                   'btn.disabled ture' \
                   'title="审核" value="通过审核">' \
                   '</a>'
-#        return format_html(btn_str, '/pass_audit/?{}'.format(parameter_str))
+       # return format_html(btn_str, '/pass_audit/?{}'.format(parameter_str))
         return format_html(btn_str,'/dashboard')
     pass_audit_str2.short_description = '通过审核'
 
@@ -60,31 +60,22 @@ class Active_ip(models.Model):
         (2,'未注册')
     )
     status = models.IntegerField( choices=statusChoices,verbose_name='状态' , default=0 )
-
-    def pass_audit_str2(self):
-        parameter_str = 'id={}&status={}'.format(str(self.id), str(self.status))
-        color_code = ''
-        btn_str = '<a class="btn btn-xs btn-danger" href="{}">' \
-                  '<input name="通过审核"' \
-                  'type="button" id="passButton" ' \
-                  'title="审核" value="通过审核">' \
-                  '</a>'
-        # btn_str = '<a class="btn btn-xs btn-danger" href="{}">' \
-        #           '<input name="审核"' \
-        #           'type="button" id="passButton" ' \
-        #           'btn.disabled ture' \
-        #           'title="审核" value="编辑">' \
-        #           '</a>' \
-        #           '<a class="btn btn-xs btn-danger" href="{}">' \
-        #           '<input name="更新"' \
-        #           'type="button" id="update"' \
-        #           'title="审核" value="更新">' \
-        #           '</a>'
-        # btn_test = '<button type="button" class="btn btn-info" name="del">删除</button> ' \
-        #            '<button type="button" class="btn btn-info" name="update">更新</button>'
-
-
-        #        return format_html(btn_str, '/pass_audit/?{}'.format(parameter_str))
-        return format_html(btn_str,'/dashboard')
-    pass_audit_str2.short_description = '操作'
-    pass_audit_str2.admin_order_field = 'status'
+#在每列后面添加单个按钮
+    # def pass_audit_str2(self):
+    #     # parameter_str = 'id={}&status={}'.format(str(self.id), str(self.status))
+    #     parameter_str = '{}'.format(str(self.id))
+    #     color_code = ''
+    #     btn_str = '<a class="btn btn-xs btn-danger" href="{}">' \
+    #               '<input name="编辑"' \
+    #               'type="button" id="passButton" ' \
+    #               'title="编辑" value="编辑">' \
+    #               '</a>'
+    #     btn_test = '<button type="button" class="btn btn-info" name="del">删除</button> ' \
+    #                '<button type="button" class="btn btn-info" name="update">更新</button>'
+    #     # btn_test = """<a class="changelink" href="{}">编辑</a>"""
+    #
+    #     return format_html(btn_str, '/admin/web/active_ip/{}/change/'.format(parameter_str))
+    #
+    # pass_audit_str2.short_description = '列表'
+    # pass_audit_str2.admin_order_field = 'status'
+    # pass_audit_str2.allow_tags = True
