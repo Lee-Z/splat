@@ -33,3 +33,4 @@ def test_ajax(request):
     else:
         return HttpResponse("You just need get method")
 
+

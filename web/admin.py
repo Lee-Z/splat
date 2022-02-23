@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 import requests
+import time
 
 
 class Agent(admin.ModelAdmin):
@@ -50,6 +51,7 @@ class Agent(admin.ModelAdmin):
     # 给按钮追加自定义的颜色
     custom_button.style = 'color:black;'
     custom_button.confirm = '是否确定注册'
+
     def pro_scan(self, request, queryset):
         if request.method == 'POST':
             #遍历取出全选设置
@@ -61,7 +63,15 @@ class Agent(admin.ModelAdmin):
                 new_json = {
                 }
                 res = requests.post(url, json=new_json)
-                print(res.json())
+                print(type(res.json()))
+                res_list = list()
+                # print(res_list)
+                for x in res.json():
+                    #插入数据库
+                    # models.IdcScan.objects.create(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='0',idc_value=i)
+                    res_list.append(models.IdcScan(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='0',idc_value=x))
+                models.IdcScan.objects.bulk_create(res_list)
+                messages.add_message(request, messages.SUCCESS, '扫描完成')
         # return queryset
     pro_scan.short_description = '进程扫描'
     pro_scan.type = 'danger'
@@ -69,7 +79,8 @@ class Agent(admin.ModelAdmin):
     pro_scan.style = 'color:black;'
     pro_scan.confirm = '是否确定扫描'
 
-    @admin.display(description='操作', ordering='id')
+    #家里报错
+    # @admin.display(description='操作', ordering='id')
     def operate(self, obj):
         #注释的btn1 为弹出提示
         # info_msg = f'这条狗的名字是：{obj.id} 年龄是：{obj.status}'
@@ -84,8 +95,9 @@ class Agent(admin.ModelAdmin):
         btn2 = f"""<button onclick='self.parent.app.openTab({data})'
                              class='el-button el-button--danger el-button--small'>删除</button>"""
         return mark_safe(f"<div>{btn1} {btn2}</div>")
-
-
+    #以下语法替换 @admin.display(description='操作', ordering='id')
+    operate.short_description = '操作'
+    operate.admin_order_field = 'id'
 
 
 
