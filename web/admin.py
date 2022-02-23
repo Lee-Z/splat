@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+import requests
 
 
 class Agent(admin.ModelAdmin):
@@ -51,9 +52,17 @@ class Agent(admin.ModelAdmin):
     custom_button.confirm = '是否确定注册'
     def pro_scan(self, request, queryset):
         if request.method == 'POST':
-            print(queryset[1])
-            print(queryset[2])
-        return queryset
+            #遍历取出全选设置
+            for e in queryset.all():
+                # print(e.id)
+                pro_ip = (models.Active_ip.objects.filter(id=e.id).values_list('ip'))
+                print (pro_ip[0][0])
+                url = "http://%s:8280/maintain/getProcess" % (pro_ip[0][0])
+                new_json = {
+                }
+                res = requests.post(url, json=new_json)
+                print(res.json())
+        # return queryset
     pro_scan.short_description = '进程扫描'
     pro_scan.type = 'danger'
     # 给按钮追加自定义的颜色
