@@ -53,25 +53,34 @@ class Agent(admin.ModelAdmin):
     custom_button.confirm = '是否确定注册'
 
     def pro_scan(self, request, queryset):
+        skipnext = False
         if request.method == 'POST':
-            #遍历取出全选设置
+            res_list = list()
+            #遍历取出全选,遍历所有勾选的ip地址
             for e in queryset.all():
-                # print(e.id)
-                pro_ip = (models.Active_ip.objects.filter(id=e.id).values_list('ip'))
-                print (pro_ip[0][0])
-                url = "http://%s:8280/maintain/getProcess" % (pro_ip[0][0])
-                new_json = {
-                }
-                res = requests.post(url, json=new_json)
-                print(type(res.json()))
-                res_list = list()
-                # print(res_list)
-                for x in res.json():
-                    #插入数据库
-                    # models.IdcScan.objects.create(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='0',idc_value=i)
-                    res_list.append(models.IdcScan(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='0',idc_value=x))
-                models.IdcScan.objects.bulk_create(res_list)
-                messages.add_message(request, messages.SUCCESS, '扫描完成')
+                try:
+                    pro_ip = (models.Active_ip.objects.filter(id=e.id).values_list('ip'))
+                    print (pro_ip[0][0])
+                    url = "http://%s:8280/maintain/getProcess" % (pro_ip[0][0])
+                    new_json = {
+                    }
+                    res = requests.post(url, json=new_json)
+                    if res:
+                        print(type(res.json()))
+                        # print(res_list)
+                        for x in res.json():
+                            #插入数据库
+                            # models.IdcScan.objects.create(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='0',idc_value=i)
+                            a = models.process_whitelist.objects.filter(whitelist_process=x)
+                            if a:
+                                print("添加白名单")
+                                res_list.append(models.IdcScan(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='1',idc_value=x))
+                            else:
+                                res_list.append(models.IdcScan(idc_ip=pro_ip[0][0], idc_command="ps", idc_status='0', idc_value=x))
+                except:
+                    print("未在线")
+            models.IdcScan.objects.bulk_create(res_list)
+            messages.add_message(request, messages.SUCCESS, '扫描完成')
         # return queryset
     pro_scan.short_description = '进程扫描'
     pro_scan.type = 'danger'
@@ -99,19 +108,39 @@ class Agent(admin.ModelAdmin):
     operate.short_description = '操作'
     operate.admin_order_field = 'id'
 
-
-
-
-
+class process_list(admin.ModelAdmin):
+    list_display = ['whitelist_id','whitelist_process','whitelist_time','whitelist_purpose']
+    search_fields = ['whitelist_process', 'whitelist_time']
+    # list_editable = ['whitelist_process']
+    list_filter = ['whitelist_time']
 
 
 
 # Register your models here.
 class Idc(admin.ModelAdmin):
-    list_display = ['idc_id', 'idc_ip','idc_command','idc_status', 'idc_time','pass_audit_str','idc_value','pass_audit_str2']
+    list_display = ['idc_id', 'idc_ip','idc_command','idc_status', 'idc_time','idc_value','add_whitelist']
     search_fields = ['idc_status', 'idc_ip','idc_value']
 #    list_editable = ['idc_ip','idc_status']
-    list_filter = ['idc_time']
+    list_filter = ['idc_status']
+    @admin.display(description='操作', ordering='id')
+    def add_whitelist(self, obj):
+        #注释的btn1 为弹出提示
+        # info_msg = f'这条狗的名字是：{obj.idc_id} 年龄是：{obj.idc_id}'
+        info_msg = models.IdcScan.objects.filter(idc_id=obj.idc_id)
+        # print(info_msg)
+        # simpleui 用的elementui ,可以使用el的类修改默认样式
+        btn1 = f"""<button onclick="prn_scan"
+                            class="el-button el-button--warning el-button--small">编辑</button>"""
+        # change = '{"name": "%s", "icon": "fas fa-user-tie", "url": "/admin/web/active_ip/%d/change/"}' % (obj.idc_id, obj.idc_id)
+        # btn1 = f"""<button onclick='self.parent.app.openTab({change})'
+        #                      class='el-button el-button--warning el-button--small'>编辑</button>"""
+        # 在新标签中打开修改界面，url可以随意指定。自己可以多做尝试
+        data = '{"name": "%s", "icon": "fas fa-user-tie", "url": "/admin/web/active_ip/%d/delete/"}' % (obj.idc_id, obj.idc_id)
+        btn2 = f"""<button onclick='self.parent.app.openTab({data})'
+                             class='el-button el-button--danger el-button--small'>删除</button>"""
+        return mark_safe(f"<div>{btn1} {btn2}</div>")
+
+
 # 增加自定义按钮
 #     actions = ['make_copy', 'custom_button','delete_button']
 #
@@ -296,5 +325,6 @@ admin.site.site_title = '运维安全后台'   # 设置title
 admin.site.index_title = '运维安全后台'
 admin.site.register(models.IdcScan,Idc)
 admin.site.register(models.Active_ip,Agent)
+admin.site.register(models.process_whitelist,process_list)
 
 

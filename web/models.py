@@ -8,7 +8,7 @@ class IdcScan(models.Model):
     idc_ip = models.CharField("ip 地址",max_length=2000)
     idc_command = models.CharField("命令",max_length=2000)
 #    idc_status = models.IntegerField("状态码")
-    idc_status = models.BooleanField('是否在白名单',choices=((0,'是'),(1,'否')))
+    idc_status = models.BooleanField('是否在白名单',choices=((0,'否'),(1,'是')))
     idc_time = models.DateTimeField("扫描时间",auto_now_add=True)
     idc_value = models.CharField("进程",max_length=2000)
     class Meta:
@@ -79,3 +79,8 @@ class Active_ip(models.Model):
     # pass_audit_str2.short_description = '列表'
     # pass_audit_str2.admin_order_field = 'status'
     # pass_audit_str2.allow_tags = True
+class process_whitelist(models.Model):
+    whitelist_id = models.AutoField("序列号",primary_key=True)
+    whitelist_process = models.CharField("进程白名单", max_length=2000)
+    whitelist_time = models.DateTimeField("创建时间", auto_now_add=True)
+    whitelist_purpose = models.CharField("备注", max_length=2000)

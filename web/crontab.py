@@ -20,26 +20,14 @@ try:
         #res 遍历取ip
         for i in res:
             print(i['ip'])
-            if skipnext:
-                models.Active_ip.objects.filter(ip=i['ip'], status=1).update(status=0)
-                print("111")
-                skipnext =False
-                continue
             try:
-            #'http://%s:8092/system/aserviceIp/monitor'%(args.server_ip)
-                response = requests.get('http://%s:8280/maintain/jiance'%i['ip'])
-                models.Active_ip.objects.filter(ip=i['ip'],status=0).update(status=1)
-                # models.Active_ip.objects.filter(ip=i['ip'], status=2).update(status=1)
-                # models.Active_ip.objects.update_or_create(defaults={'status': 1}, ip=i['ip'])
-                print(response.text)
+                response = requests.get('http://%s:8280/maintain/jiance' % i['ip'])
+                if response:
+                    models.Active_ip.objects.filter(ip=i['ip'], status=0).update(status=1)
+                    # print("客户端在线")
             except:
-                models.Active_ip.objects.filter(ip=i['ip'], status=1).update(status=0)
-                print("33333")
-                skipnext = True
-
-
-
-            # models.Active_ip.objects.update_or_create(defaults={'status': 0}, ip=i['ip'])
+                models.Active_ip.objects.filter(ip=i['ip'], status__in=[1,2]).update(status=0)
+                # print("客户端离线")
 
     register_events(scheduler)
     scheduler.start()
