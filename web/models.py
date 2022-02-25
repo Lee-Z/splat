@@ -17,6 +17,16 @@ class IdcScan(models.Model):
 #        verbose_name = "服务器扫描"
         verbose_name_plural = '服务器扫描'
 
+    # 控制显示长度，必须在adminx的list_display变量中改为函数名
+    def short_detail(self):
+        if len(str(self.idc_value)) > 30:
+            return '{}...'.format(str(self.idc_value)[0:29])
+        else:
+            return str(self.idc_value)
+    short_detail.allow_tags = True
+    short_detail.short_description = '进程'
+    short_detail.admin_order_field = 'idc_id'
+
 #右侧添加动作按钮
     def pass_audit_str(self):
         parameter_str = 'idc_id={}&status={}'.format(str(self.idc_id), str(self.idc_status))
@@ -48,6 +58,8 @@ class IdcScan(models.Model):
         return format_html(btn_str,'/dashboard')
     pass_audit_str2.short_description = '通过审核'
 
+
+
 class Active_ip(models.Model):
     id = models.AutoField("序列号",primary_key=True)
     ip = models.CharField("服务器ip", max_length=2000)
@@ -60,6 +72,8 @@ class Active_ip(models.Model):
         (2,'未注册')
     )
     status = models.IntegerField( choices=statusChoices,verbose_name='状态' , default=0 )
+
+
 #在每列后面添加单个按钮
     # def pass_audit_str2(self):
     #     # parameter_str = 'id={}&status={}'.format(str(self.id), str(self.status))

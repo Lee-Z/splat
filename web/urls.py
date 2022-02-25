@@ -7,4 +7,5 @@ from .crontab import scheduler
 urlpatterns = [
     path('dashboard', views.dashboard, name='dashboard'),
     path('system/aserviceIp/monitor/', views.test_ajax),
+    # path('test2', views.test2),
 ]

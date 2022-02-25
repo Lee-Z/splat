@@ -34,3 +34,15 @@ def test_ajax(request):
         return HttpResponse("You just need get method")
 
 
+def test2(request):
+    # if request.method == 'POST':
+    #     print("post")
+    #     is_shoucang = request.POST.get("test2")
+    #     print(is_shoucang)
+    # else:
+    #     print("get")
+    #     return HttpResponse ("HttpResponse")
+    if request.META:
+        print(request.META)
+
+
