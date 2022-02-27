@@ -58,6 +58,17 @@ class IdcScan(models.Model):
         return format_html(btn_str,'/dashboard')
     pass_audit_str2.short_description = '通过审核'
 
+    def test2(self,request,):
+        if request.method == 'POST':
+            print("post")
+            is_shoucang = request.POST.get("test1")
+            print(is_shoucang)
+        else:
+            print("get")
+
+            return HttpResponse ("HttpResponse")
+
+
 
 
 class Active_ip(models.Model):

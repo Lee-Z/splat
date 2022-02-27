@@ -6,8 +6,8 @@ from django.shortcuts import render
 from .models import IdcScan
 from web import models
 from django.http import HttpResponse
-import time
-
+import time,subprocess
+from django.views.generic import View
 
 
 def dashboard(request):
@@ -33,16 +33,15 @@ def test_ajax(request):
     else:
         return HttpResponse("You just need get method")
 
-
-def test2(request):
-    # if request.method == 'POST':
-    #     print("post")
-    #     is_shoucang = request.POST.get("test2")
-    #     print(is_shoucang)
-    # else:
-    #     print("get")
-    #     return HttpResponse ("HttpResponse")
+def update_pdaq(request):
     if request.META:
-        print(request.META)
+        # print(request.META)
+        status = start_main()
+        context = {
+            'status': status
+        }
+        return render(request, 'web/Idc_scan', context=context)
+
+
 
 
