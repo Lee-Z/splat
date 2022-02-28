@@ -9,6 +9,6 @@ from django.conf.urls import url ##新增
 urlpatterns = [
     path('dashboard', views.dashboard, name='dashboard'),
     path('system/aserviceIp/monitor/', views.test_ajax),
-    path('add',views.update_pdaq)
+    path('index',views.index)
 ]
 

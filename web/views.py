@@ -33,14 +33,13 @@ def test_ajax(request):
     else:
         return HttpResponse("You just need get method")
 
-def update_pdaq(request):
+def index(request):
     if request.META:
         # print(request.META)
-        status = start_main()
-        context = {
-            'status': status
-        }
-        return render(request, 'web/Idc_scan', context=context)
+        print("jsjsjsjsjsjsjsjsjjs")
+        a = request.POST.get()
+        print(a)
+    return HttpResponse("You just need get method")
 
 
 

@@ -140,29 +140,38 @@ class Idc(admin.ModelAdmin):
     # @admin.display(description='操作', ordering='id')
 
     def add_whitelist(self,obj):
-        #注释的btn1 为弹出提示
-        # info_msg = f'这条狗的名字是：{obj.idc_id} 年龄是：{obj.idc_id}'
-        info_msg = models.IdcScan.objects.filter(idc_id=obj.idc_id)
-        # print(info_msg)
-        # simpleui 用的elementui ,可以使用el的类修改默认样式
-        btn1 = f"""<button onclick="web/idcscan" name="test1"
-                            class="el-button el-button--warning el-button--small">添加至白名单</button>"""
-
-        # change = '{"name": "%s", "icon": "fas fa-user-tie", "url": "/admin/web/active_ip/%d/change/"}' % (obj.idc_id, obj.idc_id)
-        # btn1 = f"""<button onclick='self.parent.app.openTab({change})'
-        #                      class='el-button el-button--warning el-button--small'>编辑</button>"""
-        # 在新标签中打开修改界面，url可以随意指定。自己可以多做尝试
-        data = '{"icon": "fas fa-user-tie", "url": "web/idcscan"}'
-        # btn2 = f"""<button onclick='self.parent.app.openTab({data})' name="test2"
-        btn2 = f"""<button onclick='{data}' name="test2"
-                             class='el-button el-button--danger el-button--small'>删除</button>"""
-        btn3 = f"""<form action="/index/" method="post">
-            <p><input type="submit" value="提交"/></p>
-        </form>"""
+    #     #注释的btn1 为弹出提示
+    #     # info_msg = f'这条狗的名字是：{obj.idc_id} 年龄是：{obj.idc_id}'
+    #     info_msg = models.IdcScan.objects.filter(idc_id=obj.idc_id)
+    #     # print(info_msg)
+    #     # simpleui 用的elementui ,可以使用el的类修改默认样式
+    #     btn1 = f"""<button onclick="highlight_link" name="test1"
+    #                         class="el-button el-button--warning el-button--small">添加至白名单</button>"""
+    #
+    #     # change = '{"name": "%s", "icon": "fas fa-user-tie", "url": "/admin/web/active_ip/%d/change/"}' % (obj.idc_id, obj.idc_id)
+        btn1 = f"""<button  id='icon_{obj.idc_id}' onclick='show_pic("{obj.idc_id}")'
+                             class='el-button el-button--warning el-button--small'>添加至白名单</button>"""
+    #     # 在新标签中打开修改界面，url可以随意指定。自己可以多做尝试
+    #     data = '{"icon": "fas fa-user-tie", "url": "web/idcscan"}'
+    #     # btn2 = f"""<button onclick='self.parent.app.openTab({data})' name="test2"
+    #     btn2 = f"""<button onclick='{data}' name="test2"
+    #                          class='el-button el-button--danger el-button--small'>删除</button>"""
+    #     btn3 = f"""<form action="/index/" method="post">
+    #         <p><input type="submit" value="提交"/></p>
+    #     </form>"""
         return mark_safe(f"<div>{btn1}</div>")
-
+    # def img(self, obj):
+    #     # 在custom.js里面实现了show_pic函数，onclick进行调用
+    #     div = f"""<button id='icon_{obj.idc_id}' src='{obj.idc_ip}'
+    #     width='32px' onclick='show_pic()"' />"""
+    #     return mark_safe(div)
     add_whitelist.short_description = '操作'
     add_whitelist.admin_order_field = 'idc_id'
+    class Media:
+        js = ('/static/admin/js/custom.js',
+              #   也可以挂载cdn文件，这里仅示例
+              #  'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js',
+             )
     #取出自定义列中request 请求操作
     def get_queryset(self, request):
         qs = super(Idc, self).get_queryset(request)
