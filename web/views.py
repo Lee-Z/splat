@@ -7,7 +7,7 @@ from .models import IdcScan
 from web import models
 from django.http import HttpResponse
 import time,subprocess
-from django.views.generic import View
+import json
 
 
 def dashboard(request):
@@ -34,13 +34,9 @@ def test_ajax(request):
         return HttpResponse("You just need get method")
 
 def index(request):
-    if request.META:
-        # print(request.META)
-        print("jsjsjsjsjsjsjsjsjjs")
-        a = request.POST.get()
-        print(a)
+    json_receive = json.loads(request.body)
+    idc_id = json_receive['idc_id']
+    print("你点击了%s列"%idc_id)
     return HttpResponse("You just need get method")
-
-
 
 
