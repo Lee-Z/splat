@@ -180,6 +180,10 @@ SIMPLEUI_CONFIG = {
             'name': '进程白名单',
             'url': 'web/process_whitelist',
             'icon': 'fab fa-github'
+        },{
+            'name': '服务器出网检测',
+            'url': 'web/outgonging_detection',
+            'icon': 'fab fa-github'
         }]
     },{
         # 自2021.02.01+ 支持多级菜单，models 为子菜单名

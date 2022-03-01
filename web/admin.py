@@ -5,10 +5,11 @@ from django.http import JsonResponse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 import requests
+from IPy import IP
 import time
 from django.http import HttpResponse
 
-
+#客户端列表显示
 class Agent(admin.ModelAdmin):
     list_display = ['ip','statusColored','create_time','operate']
     search_fields = ['ip', 'state','create_time']
@@ -27,7 +28,7 @@ class Agent(admin.ModelAdmin):
     statusColored.admin_order_field = 'status'
 
     #页面上面添加按钮
-    actions = ['custom_button','pro_scan']
+    actions = ['custom_button','pro_scan','port_scan']
     def custom_button(self, request, queryset):
         print(queryset)
         if request.method == 'POST':
@@ -53,6 +54,7 @@ class Agent(admin.ModelAdmin):
     custom_button.style = 'color:black;'
     custom_button.confirm = '是否确定注册'
 
+    #进程扫描按钮
     def pro_scan(self, request, queryset):
         skipnext = False
         if request.method == 'POST':
@@ -89,6 +91,42 @@ class Agent(admin.ModelAdmin):
     pro_scan.style = 'color:black;'
     pro_scan.confirm = '是否确定扫描'
 
+    #出网检测按钮
+    def port_scan(self, request, queryset):
+        outgong_dic=list()
+        if request.method == 'POST':
+            for e in queryset.all():
+                try:
+                    pro_ip = (models.Active_ip.objects.filter(id=e.id).values_list('ip'))
+                    print (pro_ip[0][0])
+                    url = "http://%s:8280/maintain/getIp" % (pro_ip[0][0])
+                    new_json = {
+                    }
+                    res = requests.post(url, json=new_json)
+                    #该函数为 字典1个key值对应多个value值改成1个key值对应一个value值
+                    def itertransfer(mapper):
+                        for k, values in mapper.items():
+                            for v in values:
+                                yield (k, v)
+                    for k, v in itertransfer(res.json()):
+                        print(k,v.split(':')[0])
+                        outgong_dic.append(models.outgonging_detection(outgong_ip=pro_ip[0][0], outgong_connect=v.split(':')[0], outgong_port=v.split(':')[1], outgong_scan_time=k))
+                        # ip = IP(v.split(':')[0])
+                        ip = IP('114.250.149.146')
+                        print(ip.iptype())
+                except:
+                    print("报错")
+
+            models.outgonging_detection.objects.bulk_create(outgong_dic)
+            messages.add_message(request, messages.SUCCESS, '扫描完成')
+    port_scan.short_description = '端口扫描'
+    #primary 主要按钮.success 成功按钮.info 信息  warning 警告  danger 危险
+    port_scan.type = 'success'
+    # 给按钮追加自定义的颜色
+    port_scan.style = 'color:black;'
+    port_scan.confirm = '是否确定扫描'
+
+
     #家里报错
     # @admin.display(description='操作', ordering='id')
     def operate(self, obj):
@@ -109,6 +147,7 @@ class Agent(admin.ModelAdmin):
     operate.short_description = '操作'
     operate.admin_order_field = 'id'
 
+#进程白名单显示设置
 class process_list(admin.ModelAdmin):
     list_display = ['whitelist_id','whitelist_process','whitelist_time','whitelist_purpose']
     search_fields = ['whitelist_process', 'whitelist_time']
@@ -117,15 +156,9 @@ class process_list(admin.ModelAdmin):
 #   #设置哪些字段可以点击进入编辑界面
 #     list_display_links = ['id', 'caption']
 
-class PostAdmin(admin.ModelAdmin):
-    def get_list_display(request):
-        if request.user.is_superuser:
-            return ['post_title', 'body', 'rating']
-        else:
-            return ['post_title', 'category']
 
 # Register your models here.  #short_detail 将id_value做了显示限制
-
+#进程扫描列表显示设置
 class Idc(admin.ModelAdmin):
     list_display = ['idc_id', 'idc_ip','idc_command','idc_status', 'idc_time','short_detail','add_whitelist']
     search_fields = ['idc_status', 'idc_ip','idc_value']
@@ -353,16 +386,11 @@ class Idc(admin.ModelAdmin):
         }]
     }
 
-
-
-
-
-
-
-
-
-
-
+#服务器出网检测显示
+class outgonging_detection(admin.ModelAdmin):
+    list_display = ['outgong_ip','outgong_connect','outgong_port','outgong_addr','outgong_status','outgong_scan_time','outgong_purpose']
+    search_fields = ['outgong_ip','outgong_connect']
+    list_filter = ['outgong_status','outgong_scan_time']
 
 
 
@@ -373,6 +401,7 @@ admin.site.index_title = '运维安全后台'
 admin.site.register(models.IdcScan,Idc)
 admin.site.register(models.Active_ip,Agent)
 admin.site.register(models.process_whitelist,process_list)
+admin.site.register(models.outgonging_detection,outgonging_detection)
 
 
 

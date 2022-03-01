@@ -36,7 +36,13 @@ def test_ajax(request):
 def index(request):
     json_receive = json.loads(request.body)
     idc_id = json_receive['idc_id']
+    jincheng = models.IdcScan.objects.filter(idc_id=idc_id).values('idc_value')
     print("你点击了%s列"%idc_id)
-    return HttpResponse("You just need get method")
+    #取出对应id的进程
+    idc_value = jincheng[0]['idc_value']
+    models.process_whitelist.objects.get_or_create(whitelist_process=idc_value)
+    print("已添加至白名单")
+    models.IdcScan.objects.filter(idc_id=idc_id).update(idc_status=1)
+    return HttpResponse(idc_value)
 
 
