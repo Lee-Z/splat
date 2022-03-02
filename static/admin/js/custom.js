@@ -17,4 +17,9 @@ function show_pic(idc_id) {
     // // $.post('/index')
     // return idc_id
 }
+function outgongw(outgong_id) {
+    alert(outgong_id);
+    // // $.post('/index')
+    // return idc_id
+}
 

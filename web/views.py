@@ -14,8 +14,8 @@ def dashboard(request):
     user_count = User.objects.count()
     task_count = IdcScan.objects.count()
     context = { 'user_count': user_count, 'task_count': task_count }
-    return render(request, 'dashboard.html',context)
-
+    # return render(request, 'dashboard.html',context)
+    return render(request, 'map_world.html', context)
 VISIT_RECORD = {}
 def test_ajax(request):
     if request.method == "GET":

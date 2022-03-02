@@ -127,4 +127,9 @@ class outgonging_detection(models.Model):
         (1,'风险地址'),
         (2,'白名单地址')
     )
-    outgong_status = models.IntegerField( choices=statusChoices,verbose_name='状态' , default=0 )
+    outgong_status = models.IntegerField( choices=statusChoices,verbose_name='状态', default=0 )
+    network_choices = (
+        (0,'私网'),
+        (1,'公网'),
+    )
+    outgong_network = models.IntegerField( choices=network_choices,verbose_name='公私网', default=0 )

@@ -6,8 +6,10 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 import requests
 from IPy import IP
-import time
+import geoip2.database
 from django.http import HttpResponse
+
+
 
 #客户端列表显示
 class Agent(admin.ModelAdmin):
@@ -110,10 +112,41 @@ class Agent(admin.ModelAdmin):
                                 yield (k, v)
                     for k, v in itertransfer(res.json()):
                         print(k,v.split(':')[0])
-                        outgong_dic.append(models.outgonging_detection(outgong_ip=pro_ip[0][0], outgong_connect=v.split(':')[0], outgong_port=v.split(':')[1], outgong_scan_time=k))
                         # ip = IP(v.split(':')[0])
-                        ip = IP('114.250.149.146')
-                        print(ip.iptype())
+                        ip = IP(v.split(':')[0])
+                        #外网返回：PUBLIC  内网：PRIVATE  127：LOOPBACK
+                        if ip.iptype() == 'PRIVATE' or ip.iptype() == 'LOOPBACK':
+                            print("私网地址")
+                            outgong_dic.append(
+                                models.outgonging_detection(outgong_ip=pro_ip[0][0], outgong_connect=v.split(':')[0],outgong_port=v.split(':')[1],outgong_addr="本地地址", outgong_scan_time=k,outgong_network=0))
+                        elif ip.iptype() == 'PUBLIC':
+                            #根据ip获取地址位置，并插入数据库
+                            with geoip2.database.Reader('web/GeoLite2-City.mmdb') as reader:
+                                print(str(ip))
+                                response = reader.city(str(ip))
+                                if response.country.names['zh-CN'] == '中国':
+                                    #省会
+                                    province = response.subdivisions.most_specific.names['zh-CN']
+                                    #城市
+                                    city = response.city.names['zh-CN']
+                                    geographical_position = '{}{}{}'.format(response.country.names['zh-CN'],province,city)
+                                    outgong_dic.append(
+                                        models.outgonging_detection(outgong_ip=pro_ip[0][0],
+                                                                    outgong_connect=v.split(':')[0],
+                                                                    outgong_port=v.split(':')[1], outgong_addr=geographical_position,
+                                                                    outgong_scan_time=k, outgong_network=1))
+                                else:
+                                    province = response.subdivisions.most_specific.name
+                                    city = response.city.name
+                                    geographical_position = '{}'.format(response.country.names['zh-CN'])
+                                    outgong_dic.append(
+                                        models.outgonging_detection(outgong_ip=pro_ip[0][0],
+                                                                    outgong_connect=v.split(':')[0],
+                                                                    outgong_port=v.split(':')[1],
+                                                                    outgong_addr=geographical_position,
+                                                                    outgong_scan_time=k, outgong_network=1))
+                        else:
+                            print("未能识别该地址")
                 except:
                     print("报错")
 
@@ -388,10 +421,22 @@ class Idc(admin.ModelAdmin):
 
 #服务器出网检测显示
 class outgonging_detection(admin.ModelAdmin):
-    list_display = ['outgong_ip','outgong_connect','outgong_port','outgong_addr','outgong_status','outgong_scan_time','outgong_purpose']
+    list_display = ['outgong_ip','outgong_connect','outgong_port','outgong_addr','outgong_status','outgong_scan_time','outgong_purpose','outgong_whitelist']
     search_fields = ['outgong_ip','outgong_connect']
-    list_filter = ['outgong_status','outgong_scan_time']
-
+    list_filter = ['outgong_status','outgong_network','outgong_scan_time']
+    def outgong_whitelist(self,obj):
+        btn1 = f"""<button  id='icon_{obj.outgong_id}' onclick='outgongw("{obj.outgong_id}")'
+                             class='el-button el-button--warning el-button--small'>添加至白名单</button>"""
+        btn2 = f"""<button  id='icon_{obj.outgong_id}' onclick='outgongw("{obj.outgong_id}")'
+                             class='el-button el-button--warning el-button--small'>添加至白名单</button>"""
+        return mark_safe(f"<div>{btn1}{btn2}</div>")
+    outgong_whitelist.short_description = '操作'
+    outgong_whitelist.admin_order_field = 'outgong_id'
+    class Media:
+        js = ('/static/admin/js/custom.js',
+              #   也可以挂载cdn文件，这里仅示例
+              #  'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js',
+             )
 
 
 #登录页面设置
