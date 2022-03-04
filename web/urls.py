@@ -19,5 +19,7 @@ urlpatterns = [
     url(r'^lineUpdate/$', views.ChartUpdateView.as_view(), name='demo'),
     url(r'^geo/$', views.ChartView.as_view(), name='demo'),
     url(r'^geoUpdate/$', views.ChartUpdateView.as_view(), name='demo'),
+    url(r'^grid/$', views.ChartView.as_view(), name='demo'),
+    url(r'^gridUpdate/$', views.ChartUpdateView.as_view(), name='demo'),
 ]
 

@@ -11,9 +11,9 @@
 
 </head>
 <body>
-    <div id="geo" style="background-color:White;display: table;width:1600px; height:800px;"></div>
+    <div id="grid" style="background-color:White;display: table;width:1600px; height:800px;"></div>
     <script>
-        var chart = echarts.init(document.getElementById('geo'), 'white', {renderer: 'canvas'});
+        var chart = echarts.init(document.getElementById('grid'), 'white', {renderer: 'canvas'});
         var old_data = [];
         $(
             function () {
@@ -25,7 +25,7 @@
         function fetchData() {
             $.ajax({
                 type: "GET",
-                url: "http://127.0.0.1:8092/geo",
+                url: "http://127.0.0.1:8092/grid",
                 dataType: "json",
                 success: function (result) {
                     var options = result.data;
@@ -38,7 +38,7 @@
         function getDynamicData() {
             $.ajax({
                 type: "GET",
-                url: "http://127.0.0.1:8092/geoUpdate",
+                url: "http://127.0.0.1:8092/gridUpdate",
                 dataType: 'json',
                 success: function (result) {
                     var options = result.data;

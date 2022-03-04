@@ -15,8 +15,10 @@ from pyecharts import options as opts
 from pyecharts.charts import Map
 from pyecharts.faker import Faker
 from pyecharts.charts import Line
-from pyecharts.charts import Geo
+from pyecharts.charts import Geo,Grid,Page,Scatter
 from pyecharts.globals import ChartType, SymbolType
+from pyecharts.globals import ThemeType
+
 
 
 
@@ -101,44 +103,162 @@ value = [23, 59, 113, 97, 65, 30, 141,500,1000]
 #             .dump_options_with_quotes()
 #         )
 #     return c
+
+#单地图
 a = [("广州", 55), ("北京", 66), ("杭州", 77), ("重庆", 88),("西藏", 88)]
 b = [("上海", "北京"), ("广州", "北京"), ("杭州", "北京"), ("重庆", "北京"),("西藏", "北京"),("北京","新疆"),("北京","黑龙江")]
-def geo_base() -> Geo:
-    c = (
-            Geo()
-            .add_schema(
-                maptype="china",
-                itemstyle_opts=opts.ItemStyleOpts(color="#323c48", border_color="#111"),
-                label_opts=opts.LabelOpts(is_show=True)
-            )
-            .add(
-                "A",
-                a,
-                type_=ChartType.EFFECT_SCATTER,
-                color="red",
+# def geo_base() -> Geo:
+#     c = (
+#             Geo()
+#             .add_schema(
+#                 maptype="china",
+#                 itemstyle_opts=opts.ItemStyleOpts(color="#323c48", border_color="#111"),
+#                 label_opts=opts.LabelOpts(is_show=True)
+#             )
+#             .add(
+#                 "A",
+#                 a,
+#                 type_=ChartType.EFFECT_SCATTER,
+#                 color="red",
+#
+#             )
+#             .add(
+#                 "geo",
+#                 b,
+#                 type_=ChartType.LINES,
+#                 effect_opts=opts.EffectOpts(
+#                     symbol=SymbolType.ARROW, symbol_size=6, color="blue", brush_type="fill"
+#                 ),
+#                 linestyle_opts=opts.LineStyleOpts(curve=0.2,type_="dashed"),
+#                 itemstyle_opts=opts.ItemStyleOpts(color="blue"),
+#                 is_large=True,
+#             )
+#             .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+#             .set_global_opts(title_opts=opts.TitleOpts(title="Geo-Lines"))
+#             .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+#             .dump_options_with_quotes()
+#             )
+#     return c
 
-            )
-            .add(
-                "geo",
-                b,
-                type_=ChartType.LINES,
-                effect_opts=opts.EffectOpts(
-                    symbol=SymbolType.ARROW, symbol_size=6, color="blue", brush_type="fill"
-                ),
-                linestyle_opts=opts.LineStyleOpts(curve=0.2,type_="dashed"),
-                itemstyle_opts=opts.ItemStyleOpts(color="blue"),
-                is_large=True,
-            )
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
-            .set_global_opts(title_opts=opts.TitleOpts(title="Geo-Lines"))
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
-            .dump_options_with_quotes()
-            )
-    return c
+
+'''
+四图显示在一个页面，组合
+'''
+# def grid_vertical() -> Grid:    # 垂直网格
+#     bar = (
+#         Bar()
+#         .add_xaxis(Faker.choose())
+#         .add_yaxis("商家A", Faker.values())
+#         .add_yaxis("商家B", Faker.values())
+#         .set_global_opts(
+#             title_opts=opts.TitleOpts(title="Grid-Bar"),
+#             legend_opts=opts.LegendOpts(pos_left="20%")
+#         )
+#     )
+#     line = (
+#         Line()
+#         .add_xaxis(Faker.choose())
+#         .add_yaxis("商家A", Faker.values())
+#         .add_yaxis("商家B", Faker.values())
+#         .set_global_opts(
+#             title_opts=opts.TitleOpts(title="Grid-Line", pos_top="48%"),
+#             legend_opts=opts.LegendOpts(pos_top="48%", pos_left="20%")
+#         )
+#     )
+#
+#     scatter = (
+#         Scatter()
+#         .add_xaxis(Faker.choose())
+#         .add_yaxis("商家A", Faker.values())
+#         .add_yaxis("商家B", Faker.values())
+#         .set_global_opts(
+#             title_opts=opts.TitleOpts(title="Grid-Scatter", pos_right="5%"),
+#             legend_opts=opts.LegendOpts(pos_right="25%"),
+#         )
+#     )
+#     line2 = (
+#         Line()
+#         .add_xaxis(Faker.choose())
+#         .add_yaxis("商家A", Faker.values())
+#         .add_yaxis("商家B", Faker.values())
+#         .set_global_opts(
+#             title_opts=opts.TitleOpts(title="Grid-Line2", pos_right="5%", pos_top="48%"),
+#             legend_opts=opts.LegendOpts(pos_right="25%", pos_top="48%"),
+#         )
+#     )
+#     grid = (
+#         Grid()      # 上下图和左右图
+#         .add(chart=bar, grid_opts=opts.GridOpts(pos_bottom="60%", width="38%"))
+#         .add(chart=line, grid_opts=opts.GridOpts(pos_top="60%", width="38%"))
+#         .add(chart=scatter, grid_opts=opts.GridOpts(pos_left="55%", pos_bottom="60%"))
+#         .add(chart=line2, grid_opts=opts.GridOpts(pos_left="55%", pos_top="60%"))
+#         # 获取全局 options，JSON 格式（JsCode 生成的函数带引号，在前后端分离传输数据时使用）
+#         .dump_options_with_quotes()     # 官方解释：保留 JS 方法引号
+#     )
+#     return grid
+
+'''
+两图组合
+'''
+def grid_vertical() -> Grid:
+    geo = (
+        Geo()
+        .add_schema(
+            maptype="china",
+            itemstyle_opts=opts.ItemStyleOpts(color="#323c48", border_color="#111"),
+            label_opts=opts.LabelOpts(is_show=True)
+        )
+        .add(
+            "A",
+            a,
+            type_=ChartType.EFFECT_SCATTER,
+            color="red",
+
+        )
+        .add(
+            "geo",
+            b,
+            type_=ChartType.LINES,
+            effect_opts=opts.EffectOpts(
+                symbol=SymbolType.ARROW, symbol_size=6, color="blue", brush_type="fill"
+            ),
+            linestyle_opts=opts.LineStyleOpts(curve=0.2,type_="dashed"),
+            itemstyle_opts=opts.ItemStyleOpts(color="blue"),
+            is_large=True,
+        )
+        .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title="Geo-Lines"),
+            legend_opts=opts.LegendOpts(pos_left="20%")
+        )
+    )
+    line2 = (
+        Line()
+            .add_xaxis(Faker.choose())
+            .add_yaxis("", Faker.values())
+            .add_yaxis("", Faker.values())
+            .set_global_opts(
+            title_opts=opts.TitleOpts(title=" ", pos_right="5%", pos_top="48%"),
+            legend_opts=opts.LegendOpts(pos_right="25%", pos_top="48%"),
+        )
+    )
+    grid = (
+        Grid()  # 上下图和左右图
+            .add(line2, grid_opts=opts.GridOpts(pos_top="50%", pos_right="75%"))
+            .add(geo, grid_opts=opts.GridOpts(pos_left="60%"))
+            # 获取全局 options，JSON 格式（JsCode 生成的函数带引号，在前后端分离传输数据时使用）
+            .dump_options_with_quotes()  # 官方解释：保留 JS 方法引号
+    )
+    return grid
+
+
+
+
+
 
 class ChartView(APIView):
     def get(self, request, *args, **kwargs):
-        return JsonResponse(json.loads(geo_base()))
+        return JsonResponse(json.loads(grid_vertical()))
 
 
 cnt = 9
@@ -158,5 +278,3 @@ class IndexView(APIView):
         return HttpResponse(content=open("./templates/index.html").read())
         # return render(request, 'index.html', context)
 
-def test(request):
-    return HttpResponse("www")
