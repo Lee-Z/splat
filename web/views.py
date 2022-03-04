@@ -105,8 +105,8 @@ value = [23, 59, 113, 97, 65, 30, 141,500,1000]
 #     return c
 
 #单地图
-a = [("广州", 55), ("北京", 66), ("杭州", 77), ("重庆", 88),("西藏", 88)]
-b = [("上海", "北京"), ("广州", "北京"), ("杭州", "北京"), ("重庆", "北京"),("西藏", "北京"),("北京","新疆"),("北京","黑龙江")]
+a = [("广州", 5500000), ("北京", 66000), ("杭州", 77), ("重庆", 88),("西藏", 88),("新疆",1)]
+b = [("上海", "北京"), ("广州", "北京"), ("杭州", "北京"), ("重庆", "北京"),("西藏", "北京"),("北京","新疆"),("北京","黑龙江"),("北京","青海"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆")]
 # def geo_base() -> Geo:
 #     c = (
 #             Geo()
@@ -205,14 +205,16 @@ def grid_vertical() -> Grid:
         Geo()
         .add_schema(
             maptype="china",
-            itemstyle_opts=opts.ItemStyleOpts(color="#323c48", border_color="#111"),
+            itemstyle_opts=opts.ItemStyleOpts(color="#313847", border_color="#AC9D65"),
+            emphasis_itemstyle_opts=opts.ItemStyleOpts(color="red"),
             label_opts=opts.LabelOpts(is_show=True)
         )
         .add(
             "A",
             a,
             type_=ChartType.EFFECT_SCATTER,
-            color="red",
+            color="blue",
+            # is_polyline="True",
 
         )
         .add(
@@ -220,11 +222,16 @@ def grid_vertical() -> Grid:
             b,
             type_=ChartType.LINES,
             effect_opts=opts.EffectOpts(
-                symbol=SymbolType.ARROW, symbol_size=6, color="blue", brush_type="fill"
+                symbol=SymbolType.ARROW, symbol_size=6, color="#ffc20e", brush_type="Scatter"
             ),
-            linestyle_opts=opts.LineStyleOpts(curve=0.2,type_="dashed"),
+            linestyle_opts=opts.LineStyleOpts(curve=0.2,type_="dashed",color="red"),
             itemstyle_opts=opts.ItemStyleOpts(color="blue"),
+
             is_large=True,
+            #无箭头
+            # is_polyline=True,
+
+
         )
         .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
         .set_global_opts(
