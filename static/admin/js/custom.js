@@ -1,6 +1,6 @@
 function show_pic(idc_id) {
  $.ajax({
-    url: "/index",
+    url: "/jsindex",
     data: JSON.stringify({    // JSON格式封装数据
         idc_id: idc_id,
         age: 77
