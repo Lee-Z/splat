@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^bar/$', views.ChartView.as_view(), name='demo'),
     url(r'^index/$', views.IndexView.as_view(), name='demo'),
     url(r'^pie/$', views.ChartView.as_view(), name='demo'),
+    url(r'^pieUpdate/$', views.ChartView.as_view(), name='demo'),
     url(r'^map/$', views.ChartView.as_view(), name='demo'),
     url(r'^mapUpdate/$', views.ChartView.as_view(), name='demo'),
     url(r'^line/$', views.ChartView.as_view(), name='demo'),
@@ -21,5 +22,7 @@ urlpatterns = [
     url(r'^geoUpdate/$', views.ChartUpdateView.as_view(), name='demo'),
     url(r'^grid/$', views.ChartView.as_view(), name='demo'),
     url(r'^gridUpdate/$', views.ChartUpdateView.as_view(), name='demo'),
+    url(r'^page/$', views.ChartView.as_view(), name='demo'),
+    url(r'^pageUpdate/$', views.ChartUpdateView.as_view(), name='demo'),
 ]
 

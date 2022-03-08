@@ -10,7 +10,7 @@ import time,subprocess
 import json
 from random import randrange
 from rest_framework.views import APIView
-from pyecharts.charts import Bar,Pie
+from pyecharts.charts import Bar,Pie,Page
 from pyecharts import options as opts
 from pyecharts.charts import Map
 from pyecharts.faker import Faker
@@ -105,8 +105,8 @@ value = [23, 59, 113, 97, 65, 30, 141,500,1000]
 #     return c
 
 #单地图
-a = [("广州", 5500000), ("北京", 66000), ("杭州", 77), ("重庆", 88),("西藏", 88),("新疆",1)]
-b = [("上海", "北京"), ("广州", "北京"), ("杭州", "北京"), ("重庆", "北京"),("西藏", "北京"),("北京","新疆"),("北京","黑龙江"),("北京","青海"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆"),("北京","新疆")]
+a = [("广州", 55), ("北京", 66), ("杭州", 77), ("重庆", 88),("西藏", 88)]
+b = [("上海", "北京"), ("广州", "北京"), ("杭州", "北京"), ("重庆", "北京"),("西藏", "北京"),("北京","新疆"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),("北京","黑龙江"),]
 # def geo_base() -> Geo:
 #     c = (
 #             Geo()
@@ -200,65 +200,71 @@ b = [("上海", "北京"), ("广州", "北京"), ("杭州", "北京"), ("重庆"
 '''
 两图组合
 '''
+c = [1420, 94, 86, 107, 33, 48, 134,22]
+d = ["新疆", "黑龙江", "四川", "广东", "吉林", "西藏", "海南","北京"]
+
 def grid_vertical() -> Grid:
     geo = (
         Geo()
         .add_schema(
             maptype="china",
-            itemstyle_opts=opts.ItemStyleOpts(color="#313847", border_color="#AC9D65"),
-            emphasis_itemstyle_opts=opts.ItemStyleOpts(color="red"),
-            label_opts=opts.LabelOpts(is_show=True)
+            itemstyle_opts=opts.ItemStyleOpts(color="#323c48", border_color="#111"),
+            label_opts=opts.LabelOpts(is_show=True),
+            is_roam=False,
+            # legend_opts=opts.LegendOpts(pos_left="80%")
         )
         .add(
-            "A",
+            "",
             a,
             type_=ChartType.EFFECT_SCATTER,
-            color="blue",
-            # is_polyline="True",
+            color="red",
 
         )
         .add(
-            "geo",
+            "",
             b,
             type_=ChartType.LINES,
             effect_opts=opts.EffectOpts(
-                symbol=SymbolType.ARROW, symbol_size=6, color="#ffc20e", brush_type="Scatter"
+                symbol=SymbolType.ARROW,
+                symbol_size=6,
+                color="#6aa84f",
+                brush_type="fill",
             ),
-            linestyle_opts=opts.LineStyleOpts(curve=0.2,type_="dashed",color="red"),
-            itemstyle_opts=opts.ItemStyleOpts(color="blue"),
-
+            linestyle_opts=opts.LineStyleOpts(curve=0.2,type_="dashed",color="#6aa84f"),
+            itemstyle_opts=opts.ItemStyleOpts(color="red"),
             is_large=True,
-            #无箭头
-            # is_polyline=True,
-
+            color="red"
 
         )
         .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="Geo-Lines"),
-            legend_opts=opts.LegendOpts(pos_left="20%")
+            title_opts=opts.TitleOpts(title="地址访问动态图",pos_left="50%",pos_top="5%"),
+            # legend_opts=opts.LegendOpts(pos_left="50%")
         )
     )
-    line2 = (
-        Line()
-            .add_xaxis(Faker.choose())
-            .add_yaxis("", Faker.values())
-            .add_yaxis("", Faker.values())
-            .set_global_opts(
-            title_opts=opts.TitleOpts(title=" ", pos_right="5%", pos_top="48%"),
-            legend_opts=opts.LegendOpts(pos_right="25%", pos_top="48%"),
-        )
+    bar = (
+        Bar(init_opts=opts.InitOpts(theme=ThemeType.DARK))
+            .add_xaxis(d)
+            .add_yaxis("", c,bar_width="50%",category_gap=100)
+            # .add_yaxis("商家B", Faker.values())
+            .reversal_axis()
+            .set_series_opts(label_opts=opts.LabelOpts(position="right"))
+            # .set_global_opts(title_opts=opts.TitleOpts(title="Bar-翻转 XY 轴"))
     )
+
     grid = (
-        Grid()  # 上下图和左右图
-            .add(line2, grid_opts=opts.GridOpts(pos_top="50%", pos_right="75%"))
-            .add(geo, grid_opts=opts.GridOpts(pos_left="60%"))
+        Grid(
+            init_opts=opts.InitOpts(
+
+            )
+        )  # 上下图和左右图
+            # .add(pie, grid_opts=opts.GridOpts(pos_left="55%", pos_top="60%"))
+            .add(bar, grid_opts=opts.GridOpts(pos_top="50%", pos_right="75%"))
+            .add(geo, grid_opts=opts.GridOpts(pos_right="300%"))
             # 获取全局 options，JSON 格式（JsCode 生成的函数带引号，在前后端分离传输数据时使用）
             .dump_options_with_quotes()  # 官方解释：保留 JS 方法引号
     )
     return grid
-
-
 
 
 

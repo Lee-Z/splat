@@ -222,6 +222,7 @@ SIMPLEUI_CONFIG = {
 }
 
 #首页页面设置
-SIMPLEUI_HOME_PAGE = '/dashboard'
+# SIMPLEUI_HOME_PAGE = '/dashboard'
+SIMPLEUI_HOME_PAGE = '/index'
 SIMPLEUI_HOME_TITLE = '首页'
 SIMPLEUI_HOME_ICON = 'fa fa-eye'
