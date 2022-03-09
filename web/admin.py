@@ -129,7 +129,8 @@ class Agent(admin.ModelAdmin):
                                     province = response.subdivisions.most_specific.names['zh-CN']
                                     #城市
                                     city = response.city.names['zh-CN']
-                                    geographical_position = '{}{}{}'.format(response.country.names['zh-CN'],province,city)
+                                    # geographical_position = '{}{}'.format(province,city)
+                                    geographical_position = '{}'.format(province)
                                     outgong_dic.append(
                                         models.outgonging_detection(outgong_ip=pro_ip[0][0],
                                                                     outgong_connect=v.split(':')[0],

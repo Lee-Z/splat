@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.html import format_html
-
+from django.http import HttpResponse
 # Create your models here.
 #进程扫描表
 class IdcScan(models.Model):

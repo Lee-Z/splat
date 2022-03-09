@@ -214,8 +214,9 @@ def mapdata():
         g = i['outgong_id']
         print(g)
         bisect.insort(k, ('北京', i['outgong_addr']))
+    print(k)
     return k
-l = mapdata()
+
 
 
 def grid_vertical() -> Grid:
