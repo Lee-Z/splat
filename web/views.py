@@ -18,6 +18,7 @@ from pyecharts.charts import Line
 from pyecharts.charts import Geo,Grid,Page,Scatter
 from pyecharts.globals import ChartType, SymbolType
 from pyecharts.globals import ThemeType
+import bisect
 
 
 
@@ -202,7 +203,20 @@ b = [('上海', '北京'), ('广州', '北京市'), ("杭州", "北京"), ("重�
 '''
 c = [1420, 94, 86, 107, 33, 48, 134,22]
 d = ["新疆", "黑龙江", "四川", "广东", "吉林", "西藏", "海南","北京"]
-# def mapdata():
+g = int()
+k = []
+def mapdata():
+    global g
+    f = models.outgonging_detection.objects.filter(outgong_network=1, outgong_id__gt=g).values('outgong_addr', 'outgong_id')
+    print("++++++++++++++++++++++")
+    for i in f:
+        print(i['outgong_addr'])
+        g = i['outgong_id']
+        print(g)
+        bisect.insort(k, ('北京', i['outgong_addr']))
+    return k
+l = mapdata()
+
 
 def grid_vertical() -> Grid:
     geo = (
@@ -223,7 +237,7 @@ def grid_vertical() -> Grid:
         )
         .add(
             "",
-            b,
+            mapdata(),
             type_=ChartType.LINES,
             effect_opts=opts.EffectOpts(
                 symbol=SymbolType.ARROW,
