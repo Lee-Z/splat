@@ -20,6 +20,7 @@ from pyecharts.globals import ChartType, SymbolType
 from pyecharts.globals import ThemeType
 import bisect
 from django.db.models import Count
+import datetime
 
 
 
@@ -206,9 +207,11 @@ c = [1420, 94, 86, 107, 33, 48, 134,22]
 d = ["新疆", "黑龙江", "四川", "广东", "吉林", "西藏", "海南","北京"]
 g = int()
 k = []
+nowdate = datetime.datetime.now().date()
 def mapdata():
     global g
-    f = models.outgonging_detection.objects.filter(outgong_network=1, outgong_id__gt=g).values('outgong_addr', 'outgong_id')
+
+    f = models.outgonging_detection.objects.filter(outgong_network=1, outgong_id__gt=g,outgong_scan_time__gte=nowdate).values('outgong_addr', 'outgong_id')
     print("++++++++++++++++++++++")
     for i in f:
         print(i['outgong_addr'])
@@ -221,7 +224,7 @@ def mapdata():
 
 def bardata():
     #select outgong_addr,count(outgong_addr) as outcount from web_outgonging_detection group by outgong_addr;
-    objs = models.outgonging_detection.objects.values('outgong_addr').filter(outgong_network=1).annotate(
+    objs = models.outgonging_detection.objects.values('outgong_addr').filter(outgong_network=1,outgong_scan_time__gte=nowdate).annotate(
         outcount=Count('outgong_addr'))
     print(objs)
     addres = []
