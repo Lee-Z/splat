@@ -19,6 +19,7 @@ from pyecharts.charts import Geo,Grid,Page,Scatter
 from pyecharts.globals import ChartType, SymbolType
 from pyecharts.globals import ThemeType
 import bisect
+from django.db.models import Count
 
 
 
@@ -218,6 +219,19 @@ def mapdata():
     return k
 
 
+def bardata():
+    #select outgong_addr,count(outgong_addr) as outcount from web_outgonging_detection group by outgong_addr;
+    objs = models.outgonging_detection.objects.values('outgong_addr').filter(outgong_network=1).annotate(
+        outcount=Count('outgong_addr'))
+    print(objs)
+    addres = []
+    addressnum = []
+    # 这个是否返回的是一组字典对象
+    for obj in objs:
+        addres.append(obj.get('outgong_addr'))
+        addressnum.append(obj.get('outcount'))
+        # print(addres, addressnum)
+    return addres,addressnum
 
 def grid_vertical() -> Grid:
     geo = (
@@ -260,8 +274,8 @@ def grid_vertical() -> Grid:
     )
     bar = (
         Bar(init_opts=opts.InitOpts(theme=ThemeType.DARK))
-            .add_xaxis(d)
-            .add_yaxis("", c,bar_width="50%",category_gap=100)
+            .add_xaxis(bardata()[0])
+            .add_yaxis("",bardata()[1],bar_width="50%",category_gap=100)
             # .add_yaxis("商家B", Faker.values())
             .reversal_axis()
             .set_series_opts(label_opts=opts.LabelOpts(position="right"))

@@ -3,6 +3,7 @@ from django_apscheduler.jobstores import DjangoJobStore, register_events, regist
 import requests
 from web import models
 import bisect
+from django.db.models import Count
 
 #定时请求客户端状态接口
 scheduler = BackgroundScheduler()  # 创建一个调度器对象
@@ -16,6 +17,16 @@ try:
     @register_job(scheduler, "interval", minutes=1, id="time_task", replace_existing=True, misfire_grace_time=120)
     def time_task():
         """定时的任务逻辑"""
+        # objs = models.outgonging_detection.objects.values('outgong_addr').filter(outgong_network=1).annotate(
+        #     outcount=Count('outgong_addr'))
+        # addres = []
+        # addressnum = []
+        # # 这个是否返回的是一组字典对象
+        # for obj in objs:
+        #     addres.append(obj.get('outgong_addr'))
+        #     addressnum.append(obj.get('outcount'))
+        #     # print(addres, addressnum)
+        #     # return addres,addressnum
         #res = <QuerySet [{'ip': '172.30.2.1'}, {'ip': '172.30.11.100'}, {'ip': '127.0.0.1'}]>
         res = models.Active_ip.objects.values("ip")
         print(res)
