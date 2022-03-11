@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = '#2etqz-s!5^z_1z=^k&!#2an_b=a$@7(d@x6)$51r&y+=_%#-h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -183,6 +183,10 @@ SIMPLEUI_CONFIG = {
         },{
             'name': '服务器出网检测',
             'url': 'web/outgonging_detection',
+            'icon': 'fab fa-github'
+        },{
+            'name': '文件完整性',
+            'url': 'web/project_info',
             'icon': 'fab fa-github'
         }]
     },{

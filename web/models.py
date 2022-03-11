@@ -133,3 +133,29 @@ class outgonging_detection(models.Model):
         (1,'公网'),
     )
     outgong_network = models.IntegerField( choices=network_choices,verbose_name='公私网', default=0 )
+    #0 为本地地址 1为中国  2 为海外地址
+    outgong_regionnum = models.CharField("地区",max_length=200,default=0)
+
+#获取文件md5值表
+class file_md5(models.Model):
+    file_id = models.AutoField("序列号",primary_key=True)
+    file_name = models.CharField("文件名称", max_length=2000)
+    file_size = models.DateTimeField("文件大小", auto_now_add=True)
+    file_url = models.CharField("文件路径", max_length=2000)
+    file_create = models.DateTimeField("文件创建时间",auto_now_add=True)
+    file_createtime = models.DateTimeField("创建时间", auto_now_add=True)
+    #1 为增加  2为 修改 3 为删除
+    file_stat = models.CharField("文件状态", max_length=200)
+    file_serverip = models.CharField("ip连接", max_length=2000)
+    file_scanpath = models.CharField("文件路径", max_length=2000)
+
+#文件完整性扫描
+class project_info(models.Model):
+    project_id = models.AutoField("序列号",primary_key=True)
+    project_name = models.CharField("项目名称", max_length=2000)
+    project_ip = models.CharField("项目IP", max_length=2000)
+    project_scanpath = models.CharField("项目扫描地址", max_length=2000)
+    project_special = models.CharField("排除文件", max_length=2000)
+    project_updatetime = models.DateTimeField("更新时间", auto_now_add=True)
+    project_sete = models.CharField("状态", max_length=200)
+

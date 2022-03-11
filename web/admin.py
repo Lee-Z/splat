@@ -135,7 +135,7 @@ class Agent(admin.ModelAdmin):
                                         models.outgonging_detection(outgong_ip=pro_ip[0][0],
                                                                     outgong_connect=v.split(':')[0],
                                                                     outgong_port=v.split(':')[1], outgong_addr=geographical_position,
-                                                                    outgong_scan_time=k, outgong_network=1))
+                                                                    outgong_scan_time=k, outgong_network=1, outgong_regionnum=1))
                                 else:
                                     province = response.subdivisions.most_specific.name
                                     city = response.city.name
@@ -145,7 +145,7 @@ class Agent(admin.ModelAdmin):
                                                                     outgong_connect=v.split(':')[0],
                                                                     outgong_port=v.split(':')[1],
                                                                     outgong_addr=geographical_position,
-                                                                    outgong_scan_time=k, outgong_network=1))
+                                                                    outgong_scan_time=k, outgong_network=1,outgong_regionnum=2))
                         else:
                             print("未能识别该地址")
                 except:
@@ -440,6 +440,26 @@ class outgonging_detection(admin.ModelAdmin):
              )
 
 
+#文件完整性列表显示
+class ProjectInfo(admin.ModelAdmin):
+    list_display = ['project_name','project_ip','project_scanpath','project_special','project_sete','project_updatetime','operate_action']
+    search_fields = ['project_ip']
+    list_filter = ['project_sete']
+    def operate_action(self, obj):
+        btn1 = f"""<button  id='icon_{obj.project_id}' onclick='btn1("{obj.project_id}")'
+                             class='el-button el-button--warning el-button--small'>获取</button>"""
+        btn2 = f"""<button  id='icon_{obj.project_id}' onclick='btn2("{obj.project_id}")'
+                             class='el-button el-button--warning el-button--small'>比对</button>"""
+        return mark_safe(f"<div>{btn1}{btn2}</div>")
+    #以下语法替换 @admin.display(description='操作', ordering='id')
+    operate_action.short_description = '操作'
+    operate_action.admin_order_field = 'project_id'
+    class Media:
+        js = ('/static/admin/js/custom.js',
+              #   也可以挂载cdn文件，这里仅示例
+              #  'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js',
+             )
+
 #登录页面设置
 admin.site.site_header = '运维安全平台'  # 设置header
 admin.site.site_title = '运维安全后台'   # 设置title
@@ -448,6 +468,7 @@ admin.site.register(models.IdcScan,Idc)
 admin.site.register(models.Active_ip,Agent)
 admin.site.register(models.process_whitelist,process_list)
 admin.site.register(models.outgonging_detection,outgonging_detection)
+admin.site.register(models.project_info,ProjectInfo)
 
 
 

@@ -60,6 +60,11 @@ def index(request):
     models.IdcScan.objects.filter(idc_id=idc_id).update(idc_status=1)
     return HttpResponse(idc_value)
 
+
+#获取文件md5值存入数据库
+def obtain(request):
+    return HttpResponse("th is but1")
+
 #map setting
 def response_as_json(data):
     json_str = json.dumps(data)
@@ -211,7 +216,7 @@ nowdate = datetime.datetime.now().date()
 def mapdata():
     global g
 
-    f = models.outgonging_detection.objects.filter(outgong_network=1, outgong_id__gt=g,outgong_scan_time__gte=nowdate).values('outgong_addr', 'outgong_id')
+    f = models.outgonging_detection.objects.filter(outgong_regionnum=1, outgong_id__gt=g,outgong_scan_time__gte=nowdate).values('outgong_addr', 'outgong_id')
     print("++++++++++++++++++++++")
     for i in f:
         print(i['outgong_addr'])

@@ -22,4 +22,21 @@ function outgongw(outgong_id) {
     // // $.post('/index')
     // return idc_id
 }
+function btn1(project_id) {
+ $.ajax({
+    url: "/system/aserviceIp/obtain/",
+    contentType: 'application/json',
+    type: "POST",
+    traditional: true,    // 需要传递列表、字典时加上这句
+    success: function(result) {
+    },
+    fail: function(result) {
+    }
+});
+}
+function btn2(project_id) {
+    alert("btn2");
 
+    // // $.post('/index')
+    // return idc_id
+}
