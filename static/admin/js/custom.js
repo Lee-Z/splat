@@ -25,6 +25,9 @@ function outgongw(outgong_id) {
 function btn1(project_id) {
  $.ajax({
     url: "/system/aserviceIp/obtain/",
+    data: JSON.stringify({    // JSON格式封装数据
+        project_id: project_id,
+    }),
     contentType: 'application/json',
     type: "POST",
     traditional: true,    // 需要传递列表、字典时加上这句

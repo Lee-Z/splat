@@ -21,7 +21,7 @@ from pyecharts.globals import ThemeType
 import bisect
 from django.db.models import Count
 import datetime
-
+import requests
 
 
 
@@ -63,6 +63,25 @@ def index(request):
 
 #获取文件md5值存入数据库
 def obtain(request):
+    print("22222")
+    json_receive = json.loads(request.body)
+    project_id = json_receive['project_id']
+    project_ip = models.project_info.objects.filter(project_id=project_id).values('project_ip')
+    project_scanpath = models.project_info.objects.filter(project_id=project_id).values('project_scanpath')
+    project_special = models.project_info.objects.filter(project_id=project_id).values('project_special')
+    path = project_scanpath[0]['project_scanpath']
+    special = project_special[0]['project_special']
+    ip = project_ip[0]['project_ip']
+    print(json_receive)
+    print("你点击了%s"%project_ip[0]['project_ip'])
+    headers = {'Content-Type': 'application/json'}
+    url = "http://%s:8280/maintain/getMd5files" % (ip)
+    new_json = {
+        'param': path+'&&&'+'['+special+']',
+    }
+    res = requests.post(url,params=new_json,headers=headers)
+
+    print(res.text)
     return HttpResponse("th is but1")
 
 #map setting
