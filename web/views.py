@@ -102,6 +102,29 @@ def obtain(request):
     list_all_dict(data_dic,ip,path)
     return HttpResponse("200")
 
+def contrast(request):
+    print("点击了MD5比对")
+    json_receive = json.loads(request.body)
+    project_id = json_receive['project_id']
+    project_ip = models.project_info.objects.filter(project_id=project_id).values('project_ip')
+    project_scanpath = models.project_info.objects.filter(project_id=project_id).values('project_scanpath')
+    project_special = models.project_info.objects.filter(project_id=project_id).values('project_special')
+    path = project_scanpath[0]['project_scanpath']
+    special = project_special[0]['project_special']
+    ip = project_ip[0]['project_ip']
+    print(json_receive)
+    print("你点击了%s"%project_ip[0]['project_ip'])
+    headers = {'Content-Type': 'application/json'}
+    url = "http://%s:8280/maintain/getMd5files" % (ip)
+    new_json = {
+        'param': path+'&&&'+'['+special+']',
+    }
+    res = requests.post(url,params=new_json,headers=headers)
+    # print(res.text)
+    data_dic = json.loads(res.text)
+    list_all_dict(data_dic,ip,path)
+    return HttpResponse("200")
+
 #map setting
 def response_as_json(data):
     json_str = json.dumps(data)

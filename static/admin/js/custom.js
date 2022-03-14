@@ -38,8 +38,17 @@ function btn1(project_id) {
 });
 }
 function btn2(project_id) {
-    alert("btn2");
-
-    // // $.post('/index')
-    // return idc_id
+ $.ajax({
+    url: "/system/aserviceIp/contrast/",
+    data: JSON.stringify({    // JSON格式封装数据
+        project_id: project_id,
+    }),
+    contentType: 'application/json',
+    type: "POST",
+    traditional: true,    // 需要传递列表、字典时加上这句
+    success: function(result) {
+    },
+    fail: function(result) {
+    }
+});
 }

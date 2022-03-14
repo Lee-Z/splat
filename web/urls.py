@@ -10,6 +10,7 @@ urlpatterns = [
     path('dashboard', views.dashboard, name='dashboard'),
     path('system/aserviceIp/monitor/', views.test_ajax),
     path('system/aserviceIp/obtain/', views.obtain),
+    path('system/aserviceIp/contrast/', views.contrast),
     path('jsindex',views.index),
     url(r'^bar/$', views.ChartView.as_view(), name='demo'),
     url(r'^index/$', views.IndexView.as_view(), name='demo'),
