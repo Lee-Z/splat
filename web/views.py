@@ -60,6 +60,23 @@ def index(request):
     models.IdcScan.objects.filter(idc_id=idc_id).update(idc_status=1)
     return HttpResponse(idc_value)
 
+# 字典镶嵌字典遍历 {a:{b:c,d:e}},并写入数据库
+def list_all_dict(dict_a,serverip,datapath):
+    md5_dic = list()
+    if isinstance(dict_a,dict) : #使用isinstance检测数据类型
+        for x in range(len(dict_a)):
+            temp_key = list(dict_a.keys())[x]
+            temp_value = dict_a[temp_key]
+#            print("%s : %s" %(temp_key,temp_value))
+            if isinstance(temp_value,dict):
+                # print("%s  %s" %(temp_key,temp_value['路径']))
+                md5_dic.append(
+                    models.file_md5(file_name=temp_key,file_size=temp_value['大小'],file_url=temp_value['路径'],file_create=temp_value['创建时间'],file_filemd5=temp_value['MD5'],file_serverip=serverip,file_scanpath=datapath)
+                )
+            # else:
+            #     print("传入字典不对")
+            list_all_dict(temp_value,serverip,datapath) #自我调用实现无限遍历
+    models.file_md5.objects.bulk_create(md5_dic)
 
 #获取文件md5值存入数据库
 def obtain(request):
@@ -80,9 +97,10 @@ def obtain(request):
         'param': path+'&&&'+'['+special+']',
     }
     res = requests.post(url,params=new_json,headers=headers)
-
-    print(res.text)
-    return HttpResponse("th is but1")
+    # print(res.text)
+    data_dic = json.loads(res.text)
+    list_all_dict(data_dic,ip,path)
+    return HttpResponse("200")
 
 #map setting
 def response_as_json(data):

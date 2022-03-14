@@ -140,14 +140,15 @@ class outgonging_detection(models.Model):
 class file_md5(models.Model):
     file_id = models.AutoField("序列号",primary_key=True)
     file_name = models.CharField("文件名称", max_length=2000)
-    file_size = models.DateTimeField("文件大小", auto_now_add=True)
+    file_size = models.CharField("大小", max_length=2000)
     file_url = models.CharField("文件路径", max_length=2000)
-    file_create = models.DateTimeField("文件创建时间",auto_now_add=True)
+    file_create = models.DateTimeField("文件创建时间")
     file_createtime = models.DateTimeField("创建时间", auto_now_add=True)
     #1 为增加  2为 修改 3 为删除
     file_stat = models.CharField("文件状态", max_length=200)
-    file_serverip = models.CharField("ip连接", max_length=2000)
-    file_scanpath = models.CharField("文件路径", max_length=2000)
+    file_filemd5 = models.CharField("MD5", max_length=2000,default=0)
+    file_serverip = models.CharField("扫描服务器ip", max_length=2000)
+    file_scanpath = models.CharField("扫描文件路径", max_length=2000)
 
 #文件完整性扫描
 class project_info(models.Model):
