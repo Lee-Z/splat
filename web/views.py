@@ -70,6 +70,7 @@ def list_all_dict(dict_a,serverip,datapath):
 #            print("%s : %s" %(temp_key,temp_value))
             if isinstance(temp_value,dict):
                 # print("%s  %s" %(temp_key,temp_value['路径']))
+                models.file_md5.objects.filter(file_serverip=serverip ,file_scanpath=datapath).delete()
                 md5_dic.append(
                     models.file_md5(file_name=temp_key,file_size=temp_value['大小'],file_url=temp_value['路径'],file_create=temp_value['创建时间'],file_filemd5=temp_value['MD5'],file_serverip=serverip,file_scanpath=datapath)
                 )
@@ -78,7 +79,7 @@ def list_all_dict(dict_a,serverip,datapath):
             list_all_dict(temp_value,serverip,datapath) #自我调用实现无限遍历
     models.file_md5.objects.bulk_create(md5_dic)
 
-#获取文件md5值存入数据库
+#获取文件md5值存入数据库 #文件完整性 获取按钮
 def obtain(request):
     print("22222")
     json_receive = json.loads(request.body)
@@ -102,6 +103,8 @@ def obtain(request):
     list_all_dict(data_dic,ip,path)
     return HttpResponse("200")
 
+
+#文件完整性 对比按钮
 def contrast(request):
     print("点击了MD5比对")
     json_receive = json.loads(request.body)
@@ -109,6 +112,7 @@ def contrast(request):
     project_ip = models.project_info.objects.filter(project_id=project_id).values('project_ip')
     project_scanpath = models.project_info.objects.filter(project_id=project_id).values('project_scanpath')
     project_special = models.project_info.objects.filter(project_id=project_id).values('project_special')
+    project_name = models.project_info.objects.filter(project_id=project_id).values('project_name')
     path = project_scanpath[0]['project_scanpath']
     special = project_special[0]['project_special']
     ip = project_ip[0]['project_ip']
@@ -122,7 +126,41 @@ def contrast(request):
     res = requests.post(url,params=new_json,headers=headers)
     # print(res.text)
     data_dic = json.loads(res.text)
-    list_all_dict(data_dic,ip,path)
+    dbfile = []
+    scanfile = []
+    isip = models.file_md5.objects.filter(file_serverip=ip).all()
+    if isip:
+        print("ippand 不为空")
+        # 查询数据库中所有文件
+        allfile = models.file_md5.objects.values('file_url')
+        for i in allfile:
+            dbfile.append(i['file_url'])
+        if isinstance(data_dic, dict):  # 使用isinstance检测数据类型
+            for x in range(len(data_dic)):
+                # global scanfile
+                temp_key = list(data_dic.keys())[x]
+                temp_value = data_dic[temp_key]
+                scanfile.append(temp_value['路径'])
+                ispath = models.file_md5.objects.filter(file_url=temp_value['路径']).all()
+                if ispath:
+                    print("文件存在")
+                    ismd5 = models.file_md5.objects.filter(file_filemd5=temp_value['MD5']).all()
+                    if ismd5:
+                        print("文件正常")
+                    else:
+                        print("文件被修改 %s" % temp_value['路径'])
+                        models.change_file.objects.create(change_name=project_name, change_ip=project_ip,
+                                                          change_url=temp_value['路径'], change_state='2',change_updatetime=temp_value['创建时间'])
+                else:
+                    print("文件为新增 %s" % temp_value['路径'])
+                    models.change_file.objects.create(change_name=project_name,change_ip=project_ip,change_url=temp_value['路径'],change_state='1',change_updatetime=temp_value['创建时间'])
+        #将数据库文件 与 扫描出来的文件相减
+        dbfile = [i for i in dbfile if i not in scanfile]
+        for file in dbfile:
+            models.change_file.objects.create(change_name=project_name, change_ip=project_ip,
+                                              change_url=file, change_state='3',change_updatetime=temp_value['创建时间'])
+    else:
+        print("该ip未扫描")
     return HttpResponse("200")
 
 #map setting

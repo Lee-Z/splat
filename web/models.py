@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.html import format_html
 from django.http import HttpResponse
+import django.utils.timezone as timezone
 # Create your models here.
 #进程扫描表
 class IdcScan(models.Model):
@@ -160,3 +161,18 @@ class project_info(models.Model):
     project_updatetime = models.DateTimeField("更新时间", auto_now_add=True)
     project_sete = models.CharField("状态", max_length=200)
 
+#异常变动文件表
+class change_file(models.Model):
+    change_id = models.AutoField("序列号",primary_key=True)
+    change_name = models.CharField("项目名称", max_length=2000)
+    change_ip = models.CharField("项目IP", max_length=2000)
+    change_url = models.CharField("文件路径", max_length=2000)
+    change_updatetime = models.DateTimeField("更新时间")
+    change_scantime = models.DateTimeField("对比时间",auto_now_add=True)
+    # 1 为增加  2为 修改 3 为删除
+    ChangeChoices = (
+        (1,'增加'),
+        (2,'修改'),
+        (3,'删除')
+    )
+    change_state = models.IntegerField(choices=ChangeChoices, verbose_name='文件状态')

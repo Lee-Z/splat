@@ -188,6 +188,10 @@ SIMPLEUI_CONFIG = {
             'name': '文件完整性',
             'url': 'web/project_info',
             'icon': 'fab fa-github'
+        },{
+            'name': '异常文件信息',
+            'url': 'web/change_file',
+            'icon': 'fab fa-github'
         }]
     },{
         # 自2021.02.01+ 支持多级菜单，models 为子菜单名

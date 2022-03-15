@@ -460,6 +460,20 @@ class ProjectInfo(admin.ModelAdmin):
               #  'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js',
              )
 
+
+#异常文件信息
+class ChangeFile(admin.ModelAdmin):
+    list_display = ['change_name','change_ip','change_url','change_state','change_updatetime','change_scantime','change_down']
+    search_fields = ['change_name']
+    list_filter = ['change_state']
+    def change_down(self, obj):
+        path = obj.change_id
+        button_html = "<a  href='{}'>下载文件</a>".format(path)
+        return format_html(button_html)
+    #以下语法替换 @admin.display(description='操作', ordering='id')
+    change_down.short_description = '操作'
+    change_down.admin_order_field = 'change_id'
+
 #登录页面设置
 admin.site.site_header = '运维安全平台'  # 设置header
 admin.site.site_title = '运维安全后台'   # 设置title
@@ -469,6 +483,7 @@ admin.site.register(models.Active_ip,Agent)
 admin.site.register(models.process_whitelist,process_list)
 admin.site.register(models.outgonging_detection,outgonging_detection)
 admin.site.register(models.project_info,ProjectInfo)
+admin.site.register(models.change_file,ChangeFile)
 
 
 
