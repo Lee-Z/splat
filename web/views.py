@@ -22,6 +22,10 @@ import bisect
 from django.db.models import Count
 import datetime
 import requests
+import os
+from django.http import FileResponse
+from werkzeug.wsgi import FileWrapper
+
 
 
 
@@ -151,9 +155,31 @@ def contrast(request):
                         print("文件被修改 %s" % temp_value['路径'])
                         models.change_file.objects.create(change_name=project_name, change_ip=project_ip,
                                                           change_url=temp_value['路径'], change_state='2',change_updatetime=temp_value['创建时间'])
+                        headers = {'Content-Type': 'application/json',
+                                   'fileName': temp_value['路径']
+                                   }
+                        url = "http://%s:8280/maintain/download" % (project_ip[0]['project_ip'])
+                        res = requests.post(url, headers=headers)
+                        # print(res.text)
+                        host_ini = os.path.basename(temp_value['路径'])
+                        print(host_ini)
+                        filename = 'C:\iso\%s' % host_ini
+                        with open(filename, 'wb') as file:
+                            file.write(res.content)
                 else:
                     print("文件为新增 %s" % temp_value['路径'])
                     models.change_file.objects.create(change_name=project_name,change_ip=project_ip,change_url=temp_value['路径'],change_state='1',change_updatetime=temp_value['创建时间'])
+                    headers = {'Content-Type': 'application/json',
+                               'fileName': temp_value['路径']
+                               }
+                    url = "http://%s:8280/maintain/download" % (project_ip[0]['project_ip'])
+                    res = requests.post(url, headers=headers)
+                    # print(res.text)
+                    host_ini = os.path.basename(temp_value['路径'])
+                    print(host_ini)
+                    filename = 'C:\iso\%s' % host_ini
+                    with open(filename, 'wb') as file:
+                        file.write(res.content)
         #将数据库文件 与 扫描出来的文件相减
         dbfile = [i for i in dbfile if i not in scanfile]
         for file in dbfile:
@@ -162,6 +188,25 @@ def contrast(request):
     else:
         print("该ip未扫描")
     return HttpResponse("200")
+
+
+#异常文件下载
+def download(request):
+    change_id = request.GET.get('change_id')
+    file_name = models.change_file.objects.filter(change_id=change_id).values(change_url)
+    # file_name = os.path.basename(file_path)
+    file_path = 'C:/iso/%s' % file_name
+    # if not os.path.isfile(file_path):  # 判断下载文件是否存在
+    #     return HttpResponse("Sorry but Not Found the File")
+    file = open(file_path, 'rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename=%s' %(file_name)
+    return response
+
+
+
+
 
 #map setting
 def response_as_json(data):

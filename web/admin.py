@@ -8,6 +8,8 @@ import requests
 from IPy import IP
 import geoip2.database
 from django.http import HttpResponse
+from django.utils.html import format_html
+import os
 
 
 
@@ -468,7 +470,18 @@ class ChangeFile(admin.ModelAdmin):
     list_filter = ['change_state']
     def change_down(self, obj):
         path = obj.change_id
-        button_html = "<a  href='{}'>下载文件</a>".format(path)
+        # headers = {'Content-Type': 'application/json',
+        #            'fileName': obj.change_url
+        #            }
+        # url = "http://%s:8280/maintain/download" % (obj.change_ip)
+        # res = requests.post(url, headers=headers)
+        # print(res.text)
+        change_id = os.path.basename(obj.change_id)
+        download = "http://127.0.0.1:8092/download?change_id=%d" %change_id
+        # download = "http://127.0.0.1:8092/download"
+        # print('点击了%s' %obj.change_id)
+        button_html = "<a  href='{}'>下载文件</a>".format(download)
+        # button_html = "<a  href='#'>下载文件</a>"
         return format_html(button_html)
     #以下语法替换 @admin.display(description='操作', ordering='id')
     change_down.short_description = '操作'
