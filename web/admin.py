@@ -476,8 +476,8 @@ class ChangeFile(admin.ModelAdmin):
         # url = "http://%s:8280/maintain/download" % (obj.change_ip)
         # res = requests.post(url, headers=headers)
         # print(res.text)
-        change_id = os.path.basename(obj.change_id)
-        download = "http://127.0.0.1:8092/download?change_id=%d" %change_id
+        # change_id = os.path.basename(obj.change_id)
+        download = "http://127.0.0.1:8092/download?change_id=%s" % (obj.change_id)
         # download = "http://127.0.0.1:8092/download"
         # print('点击了%s' %obj.change_id)
         button_html = "<a  href='{}'>下载文件</a>".format(download)

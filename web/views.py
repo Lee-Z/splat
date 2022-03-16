@@ -163,7 +163,8 @@ def contrast(request):
                         # print(res.text)
                         host_ini = os.path.basename(temp_value['路径'])
                         print(host_ini)
-                        filename = 'C:\iso\%s' % host_ini
+                        # filename = 'C:\iso\%s' % host_ini
+                        filename = '/Users/app/%s' % host_ini
                         with open(filename, 'wb') as file:
                             file.write(res.content)
                 else:
@@ -193,9 +194,12 @@ def contrast(request):
 #异常文件下载
 def download(request):
     change_id = request.GET.get('change_id')
-    file_name = models.change_file.objects.filter(change_id=change_id).values(change_url)
+    # models.change_file.objects.filter(change_id=change_id).values(change_url)
     # file_name = os.path.basename(file_path)
-    file_path = 'C:/iso/%s' % file_name
+    file_name = models.change_file.objects.filter(change_id=change_id).values('change_url')
+    file_name = os.path.basename(file_name[0]['change_url'])
+    # file_path = 'C:/iso/%s' % file_name
+    file_path = '/Users/app/%s' % file_name
     # if not os.path.isfile(file_path):  # 判断下载文件是否存在
     #     return HttpResponse("Sorry but Not Found the File")
     file = open(file_path, 'rb')
