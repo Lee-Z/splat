@@ -161,10 +161,19 @@ def contrast(request):
                         url = "http://%s:8280/maintain/download" % (project_ip[0]['project_ip'])
                         res = requests.post(url, headers=headers)
                         # print(res.text)
+                        #文件名称
                         host_ini = os.path.basename(temp_value['路径'])
-                        print(host_ini)
+                        #获取文件路径
+                        directory = os.path.dirname(temp_value['路径'])
+                        hostpath = '/Users/app/'
+                        print(ip)
+                        #存在全路径拼接
+                        # allpath = os.path.join(hostpath,ip,directory)
+                        allpath = hostpath+ip+directory
+                        if not os.path.exists(allpath): os.makedirs(allpath)
                         # filename = 'C:\iso\%s' % host_ini
-                        filename = '/Users/app/%s' % host_ini
+                        filename = '%s/%s' % (allpath,host_ini)
+                        print(filename)
                         with open(filename, 'wb') as file:
                             file.write(res.content)
                 else:
@@ -196,13 +205,16 @@ def download(request):
     change_id = request.GET.get('change_id')
     # models.change_file.objects.filter(change_id=change_id).values(change_url)
     # file_name = os.path.basename(file_path)
-    file_name = models.change_file.objects.filter(change_id=change_id).values('change_url')
-    file_name = os.path.basename(file_name[0]['change_url'])
+    path_file_name = models.change_file.objects.filter(change_id=change_id).values('change_url')
+    file_name = os.path.basename(path_file_name[0]['change_url'])
+    path_name = path_file_name[0]['change_url']
+    db_ip = models.change_file.objects.filter(change_id=change_id).values('change_ip')
+    ip = db_ip[0]['change_ip']
     # file_path = 'C:/iso/%s' % file_name
-    file_path = '/Users/app/%s' % file_name
+    all_path = '/Users/app/%s/%s' % (ip,path_name)
     # if not os.path.isfile(file_path):  # 判断下载文件是否存在
     #     return HttpResponse("Sorry but Not Found the File")
-    file = open(file_path, 'rb')
+    file = open(all_path, 'rb')
     response = FileResponse(file)
     response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = 'attachment;filename=%s' %(file_name)
