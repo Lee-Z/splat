@@ -210,6 +210,7 @@ def download(request):
     path_name = path_file_name[0]['change_url']
     db_ip = models.change_file.objects.filter(change_id=change_id).values('change_ip')
     ip = db_ip[0]['change_ip']
+    #/opt/msyd_scan/server/download 生产路径
     # file_path = 'C:/iso/%s' % file_name
     all_path = '/Users/app/%s/%s' % (ip,path_name)
     # if not os.path.isfile(file_path):  # 判断下载文件是否存在
@@ -488,3 +489,24 @@ class IndexView(APIView):
         return HttpResponse(content=open("./templates/index.html").read())
         # return render(request, 'index.html', context)
 
+
+#axios 请求数据测试接口
+
+def Getaxios(request):
+    if request.method == 'GET':
+        print('axios 请求')
+        data = []
+        sever_ip = models.Active_ip.objects.filter(status='1').values('ip')
+        for i in sever_ip:
+            dicdata = {}
+            server_id = models.Active_ip.objects.filter(ip=i['ip']).values('id')
+            a.append(server_id[0]['id'])
+            dicdata['key'] = server_id[0]['id']
+            dicdata['label'] = i['ip']
+            data.append(dicdata)
+        print(a)
+        data_json= json.dumps(data)
+        print(data_json)
+        result = '[{ "key": 1, "label": "172.30.2.1", "disabled": false },{ "key": 2, "label": "172.30.2.2", "disabled": false }]'
+        print(type(result))
+        return HttpResponse(data_json)

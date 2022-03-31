@@ -7,3 +7,4 @@ IPy==1.01
 pyecharts==1.9.1
 pymysql==1.0.2
 requests==2.27.1
+Werkzeug==1.0.1

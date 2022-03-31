@@ -13,6 +13,7 @@ urlpatterns = [
     path('system/aserviceIp/contrast/', views.contrast),
     path('download', views.download),
     path('jsindex',views.index),
+    path('getaxios',views.Getaxios),
     url(r'^bar/$', views.ChartView.as_view(), name='demo'),
     url(r'^index/$', views.IndexView.as_view(), name='demo'),
     url(r'^pie/$', views.ChartView.as_view(), name='demo'),
