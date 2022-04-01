@@ -489,7 +489,6 @@ class IndexView(APIView):
         return HttpResponse(content=open("./templates/index.html").read())
         # return render(request, 'index.html', context)
 
-
 #axios 请求数据测试接口
 
 def Getaxios(request):
@@ -510,3 +509,9 @@ def Getaxios(request):
         result = '[{ "key": 1, "label": "172.30.2.1", "disabled": false },{ "key": 2, "label": "172.30.2.2", "disabled": false }]'
         print(type(result))
         return HttpResponse(data_json)
+def PostAxios(request):
+    if request.method == 'POST':
+        print("axios 是post请求")
+        print(request.POST.get('param1'))
+        print(request.POST.get('param2'))
+        return HttpResponse("post request")
