@@ -26,6 +26,10 @@ import os
 from django.http import FileResponse
 from werkzeug.wsgi import FileWrapper
 
+def cronpage(request):
+
+    # return render(request, 'dashboard.html',context)
+    return render(request, 'cronindex.html')
 
 
 
@@ -512,6 +516,9 @@ def Getaxios(request):
 def PostAxios(request):
     if request.method == 'POST':
         print("axios 是post请求")
-        print(request.POST.get('param1'))
-        print(request.POST.get('param2'))
+        print(request.POST.get('serverip'))
+        print(request.POST.get('taskoptions'))
+        print(request.POST.get('cron'))
+        print(request.POST.get('status'))
+        print(request.POST.get('remarks'))
         return HttpResponse("post request")

@@ -176,3 +176,16 @@ class change_file(models.Model):
         (3,'删除')
     )
     change_state = models.IntegerField(choices=ChangeChoices, verbose_name='文件状态')
+
+#定时任务列表
+class cron_info(models.Model):
+    cron_id = models.AutoField("序列号",primary_key=True)
+    cron_ip = models.CharField("服务器IP", max_length=2000)
+    cron_task = models.CharField("任务", max_length=2000)
+    cron_strategy = models.CharField("定时策略", max_length=2000)
+    cron_choices = (
+        (0, '关闭'),
+        (1, '开启'),
+    )
+    cron_stat = models.IntegerField(choices=cron_choices, verbose_name='关闭', default=0)
+    cron_purpose = models.CharField("备注", max_length=2000)

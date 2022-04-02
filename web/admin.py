@@ -487,6 +487,14 @@ class ChangeFile(admin.ModelAdmin):
     change_down.short_description = '操作'
     change_down.admin_order_field = 'change_id'
 
+
+#定时任务信息
+class Cron(admin.ModelAdmin):
+    list_display = ['cron_ip', 'cron_task', 'cron_strategy', 'cron_stat', 'cron_purpose']
+    search_fields = ['cron_ip']
+    list_filter = ['cron_ip']
+
+
 #登录页面设置
 admin.site.site_header = '运维安全平台'  # 设置header
 admin.site.site_title = '运维安全后台'   # 设置title
@@ -497,6 +505,7 @@ admin.site.register(models.process_whitelist,process_list)
 admin.site.register(models.outgonging_detection,outgonging_detection)
 admin.site.register(models.project_info,ProjectInfo)
 admin.site.register(models.change_file,ChangeFile)
+admin.site.register(models.cron_info,Cron)
 
 
 
