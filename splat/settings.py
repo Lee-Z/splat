@@ -196,6 +196,10 @@ SIMPLEUI_CONFIG = {
             'name': '异常文件信息',
             'url': 'web/change_file',
             'icon': 'fab fa-github'
+        },{
+            'name': '定时任务',
+            'url': 'web/cron_info',
+            'icon': 'fab fa-github'
         }]
     },{
         # 自2021.02.01+ 支持多级菜单，models 为子菜单名

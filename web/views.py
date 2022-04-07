@@ -25,6 +25,14 @@ import requests
 import os
 from django.http import FileResponse
 from werkzeug.wsgi import FileWrapper
+import json
+from django.http import JsonResponse
+from apscheduler.schedulers.background import BackgroundScheduler
+from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
+from web import admin
+from IPy import IP
+import geoip2.database
+
 
 def cronpage(request):
 
@@ -513,12 +521,126 @@ def Getaxios(request):
         result = '[{ "key": 1, "label": "172.30.2.1", "disabled": false },{ "key": 2, "label": "172.30.2.2", "disabled": false }]'
         print(type(result))
         return HttpResponse(data_json)
+
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_jobstore(DjangoJobStore(), 'default')
 def PostAxios(request):
     if request.method == 'POST':
+        # content = json.loads(request.body.decode())
         print("axios 是post请求")
         print(request.POST.get('serverip'))
         print(request.POST.get('taskoptions'))
         print(request.POST.get('cron'))
         print(request.POST.get('status'))
         print(request.POST.get('remarks'))
-        return HttpResponse("post request")
+        print(request.POST.get('startime'))
+        # return HttpResponse("post request")
+        try:
+            start_time = request.POST.get('cron')  # 用户输入的任务开始时间, '10:00:00'
+            start_time = start_time.split(' ')
+            print(start_time)
+            second = (start_time)[0]
+            print(second)
+            print(type(second))
+            minute = (start_time)[1]
+            hour = (start_time)[2]
+            day = (start_time)[3]
+            mon = (start_time)[4]
+            week = (start_time)[5]
+            year = (start_time)[6]
+            name = request.POST.get('name')
+            id = request.POST.get('remarks')
+            serverid = request.POST.get('serverip').split(',')
+            # s = content['status']  # 接收执行任务的各种参数
+            # 创建任务
+            scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=id),
+            # job_name.remove()
+            # if (id == '888'):
+            #     scheduler.remove_job(jobname)
+            scheduler.start()
+            code = '200'
+            message = 'success'
+        except Exception as e:
+            code = '400'
+            message = e
+
+        back = {
+            'code': code,
+            'message': message
+        }
+        return JsonResponse(json.dumps(back, ensure_ascii=False))
+        # return JsonResponse("11111")
+
+#定时调用服务器出外网连接
+def port(queryset):
+    print("执行了任务计划")
+    outgong_dic = list()
+    for e in queryset:
+        print(e)
+        try:
+            pro_ip = (models.Active_ip.objects.filter(id=e).values_list('ip'))
+            print(pro_ip[0][0])
+            url = "http://%s:8280/maintain/getIp" % (pro_ip[0][0])
+            new_json = {
+            }
+            res = requests.post(url, json=new_json)
+
+            # 该函数为 字典1个key值对应多个value值改成1个key值对应一个value值
+            def itertransfer(mapper):
+                for k, values in mapper.items():
+                    for v in values:
+                        yield (k, v)
+
+            for k, v in itertransfer(res.json()):
+                print(k, v.split(':')[0])
+                # ip = IP(v.split(':')[0])
+                ip = IP(v.split(':')[0])
+                # 外网返回：PUBLIC  内网：PRIVATE  127：LOOPBACK
+                if ip.iptype() == 'PRIVATE' or ip.iptype() == 'LOOPBACK':
+                    print("私网地址")
+                    outgong_dic.append(
+                        models.outgonging_detection(outgong_ip=pro_ip[0][0], outgong_connect=v.split(':')[0],
+                                                    outgong_port=v.split(':')[1], outgong_addr="本地地址",
+                                                    outgong_scan_time=k, outgong_network=0))
+                elif ip.iptype() == 'PUBLIC':
+                    # 根据ip获取地址位置，并插入数据库
+                    with geoip2.database.Reader('web/GeoLite2-City.mmdb') as reader:
+                        print(str(ip))
+                        response = reader.city(str(ip))
+                        if response.country.names['zh-CN'] == '中国':
+                            # 省会
+                            province = response.subdivisions.most_specific.names['zh-CN']
+                            # 城市
+                            city = response.city.names['zh-CN']
+                            # geographical_position = '{}{}'.format(province,city)
+                            geographical_position = '{}'.format(province)
+                            outgong_dic.append(
+                                models.outgonging_detection(outgong_ip=pro_ip[0][0],
+                                                            outgong_connect=v.split(':')[0],
+                                                            outgong_port=v.split(':')[1],
+                                                            outgong_addr=geographical_position,
+                                                            outgong_scan_time=k, outgong_network=1,
+                                                            outgong_regionnum=1))
+                        else:
+                            province = response.subdivisions.most_specific.name
+                            city = response.city.name
+                            geographical_position = '{}'.format(response.country.names['zh-CN'])
+                            outgong_dic.append(
+                                models.outgonging_detection(outgong_ip=pro_ip[0][0],
+                                                            outgong_connect=v.split(':')[0],
+                                                            outgong_port=v.split(':')[1],
+                                                            outgong_addr=geographical_position,
+                                                            outgong_scan_time=k, outgong_network=1,
+                                                            outgong_regionnum=2))
+                else:
+                    print("未能识别该地址")
+        except Exception as  f:
+            print(f)
+    models.outgonging_detection.objects.bulk_create(outgong_dic)
+
+register_events(scheduler)
+# scheduler.remove_job('267ca7b905ac47598cd052799b87c555')
+# scheduler.start()
+# scheduler.remove_job('888')
