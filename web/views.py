@@ -553,9 +553,20 @@ def PostAxios(request):
             name = request.POST.get('name')
             id = request.POST.get('remarks')
             serverid = request.POST.get('serverip').split(',')
+            taskoptions_list = request.POST.get('taskoptions').split(',')
             # s = content['status']  # 接收执行任务的各种参数
             # 创建任务
-            scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=id),
+            for i in taskoptions_list:
+                if (i == '外网访问定时扫描'):
+                    scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=id),
+                elif (i == '文件定时扫描'):
+                    scheduler.add_job(md5file, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
+                                      minute=minute, args=[serverid], second=second, id=id),
+                elif (i == '进程定时扫描'):
+                    scheduler.add_job(process, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
+                                      minute=minute, args=[serverid], second=second, id='id+i'),
+                else:
+                    print("未选中定时任务选项")
             # job_name.remove()
             # if (id == '888'):
             #     scheduler.remove_job(jobname)
@@ -639,6 +650,43 @@ def port(queryset):
         except Exception as  f:
             print(f)
     models.outgonging_detection.objects.bulk_create(outgong_dic)
+
+
+#定时调用文件完整性扫描
+def md5file(w):
+    print("点击了定时异常扫描选项")
+    print(w)
+
+#定时调用服务器进程扫描
+def process(queryset):
+    skipnext = False
+    res_list = list()
+    # 遍历取出全选,遍历所有勾选的ip地址
+    for e in queryset:
+        try:
+            pro_ip = (models.Active_ip.objects.filter(id=e).values_list('ip'))
+            print(pro_ip[0][0])
+            url = "http://%s:8280/maintain/getProcess" % (pro_ip[0][0])
+            new_json = {
+            }
+            res = requests.post(url, json=new_json)
+            if res:
+                print(type(res.json()))
+                # print(res_list)
+                for x in res.json():
+                    # 插入数据库
+                    # models.IdcScan.objects.create(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='0',idc_value=i)
+                    a = models.process_whitelist.objects.filter(whitelist_process=x)
+                    if a:
+                        print("添加白名单")
+                        res_list.append(
+                            models.IdcScan(idc_ip=pro_ip[0][0], idc_command="ps", idc_status='1', idc_value=x))
+                    else:
+                        res_list.append(
+                            models.IdcScan(idc_ip=pro_ip[0][0], idc_command="ps", idc_status='0', idc_value=x))
+        except:
+            print("未在线")
+    models.IdcScan.objects.bulk_create(res_list)
 
 register_events(scheduler)
 # scheduler.remove_job('267ca7b905ac47598cd052799b87c555')
