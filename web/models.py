@@ -1,7 +1,11 @@
 from django.db import models
 from django.utils.html import format_html
 from django.http import HttpResponse
+
 import django.utils.timezone as timezone
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
 # Create your models here.
 #进程扫描表
 class IdcScan(models.Model):
@@ -177,11 +181,15 @@ class change_file(models.Model):
     )
     change_state = models.IntegerField(choices=ChangeChoices, verbose_name='文件状态')
 
+
+scheduler = BackgroundScheduler(timezone='Asia/Shanghai')
+scheduler.add_jobstore(DjangoJobStore(), 'default')
 #定时任务列表
 class cron_info(models.Model):
+    cron_name = models.CharField("任务名称", max_length=2000,default=0)
     cron_id = models.AutoField("序列号",primary_key=True)
     cron_ip = models.CharField("服务器IP", max_length=2000)
-    cron_task = models.CharField("任务", max_length=2000)
+    cron_task = models.CharField("定时任务", max_length=2000)
     cron_strategy = models.CharField("定时策略", max_length=2000)
     cron_choices = (
         (0, '关闭'),
@@ -189,3 +197,7 @@ class cron_info(models.Model):
     )
     cron_stat = models.IntegerField(choices=cron_choices, verbose_name='关闭', default=0)
     cron_purpose = models.CharField("备注", max_length=2000)
+
+
+
+

@@ -524,7 +524,7 @@ def Getaxios(request):
 
 
 
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone='Asia/Shanghai')
 scheduler.add_jobstore(DjangoJobStore(), 'default')
 def PostAxios(request):
     if request.method == 'POST':
@@ -550,7 +550,7 @@ def PostAxios(request):
             mon = (start_time)[4]
             week = (start_time)[5]
             year = (start_time)[6]
-            name = request.POST.get('name')
+            name = request.POST.get('cronname')
             id = request.POST.get('remarks')
             serverid = request.POST.get('serverip').split(',')
             taskoptions_list = request.POST.get('taskoptions').split(',')
@@ -558,13 +558,16 @@ def PostAxios(request):
             # 创建任务
             for i in taskoptions_list:
                 if (i == '外网访问定时扫描'):
-                    scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=id),
+                    scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=str(name+i)),
+
+                    models.cron_info.objects.create(cron_name=name,cron_ip='ip',cron_task=i)
+
                 elif (i == '文件定时扫描'):
                     scheduler.add_job(md5file, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
-                                      minute=minute, args=[serverid], second=second, id=id),
+                                      minute=minute, args=[serverid], second=second, id=str(name+i)),
                 elif (i == '进程定时扫描'):
                     scheduler.add_job(process, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
-                                      minute=minute, args=[serverid], second=second, id='id+i'),
+                                      minute=minute, args=[serverid], second=second, id=str(name+i)),
                 else:
                     print("未选中定时任务选项")
             # job_name.remove()
@@ -581,8 +584,8 @@ def PostAxios(request):
             'code': code,
             'message': message
         }
-        return JsonResponse(json.dumps(back, ensure_ascii=False))
-        # return JsonResponse("11111")
+        # return JsonResponse(json.dumps(back, ensure_ascii=False))
+        return JsonResponse("11111")
 
 #定时调用服务器出外网连接
 def port(queryset):
@@ -647,6 +650,7 @@ def port(queryset):
                                                             outgong_regionnum=2))
                 else:
                     print("未能识别该地址")
+                return pro_ip[0][0]
         except Exception as  f:
             print(f)
     models.outgonging_detection.objects.bulk_create(outgong_dic)
@@ -688,7 +692,13 @@ def process(queryset):
             print("未在线")
     models.IdcScan.objects.bulk_create(res_list)
 
+
+
 register_events(scheduler)
 # scheduler.remove_job('267ca7b905ac47598cd052799b87c555')
-# scheduler.start()
+
+scheduler.start()
+# print(scheduler.get_jobs())
 # scheduler.remove_job('888')
+
+

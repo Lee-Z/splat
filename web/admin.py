@@ -488,9 +488,10 @@ class ChangeFile(admin.ModelAdmin):
     change_down.admin_order_field = 'change_id'
 
 
+
 #定时任务信息
 class Cron(admin.ModelAdmin):
-    list_display = ['cron_ip', 'cron_task', 'cron_strategy', 'cron_stat', 'cron_purpose']
+    list_display = ['cron_name','cron_ip', 'cron_task', 'cron_strategy', 'cron_stat', 'cron_purpose']
     search_fields = ['cron_ip']
     list_filter = ['cron_ip']
     actions = ['crontbutton']
@@ -502,6 +503,9 @@ class Cron(admin.ModelAdmin):
     crontbutton.style = 'color:black;'
     crontbutton.action_type = 0
     crontbutton.action_url = 'http://127.0.0.1:8092/cronpage'
+
+
+
 
 
 
