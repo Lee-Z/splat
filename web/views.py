@@ -540,10 +540,7 @@ def PostAxios(request):
         try:
             start_time = request.POST.get('cron')  # 用户输入的任务开始时间, '10:00:00'
             start_time = start_time.split(' ')
-            print(start_time)
             second = (start_time)[0]
-            print(second)
-            print(type(second))
             minute = (start_time)[1]
             hour = (start_time)[2]
             day = (start_time)[3]
@@ -555,21 +552,27 @@ def PostAxios(request):
             serverid = request.POST.get('serverip').split(',')
             taskoptions_list = request.POST.get('taskoptions').split(',')
             # s = content['status']  # 接收执行任务的各种参数
+            print(start_time)
             # 创建任务
-            for i in taskoptions_list:
-                if (i == '外网访问定时扫描'):
-                    scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=str(name+i)),
+            for x in serverid:
+                server_ip = (models.Active_ip.objects.filter(id=x).values_list('ip'))
+                for i in taskoptions_list:
+                    if (i == '外网访问定时扫描'):
+                        scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=str(name+i+x)),
+                        # for x in serverid:
+                        #     server_ip = (models.Active_ip.objects.filter(id=x).values_list('ip'))
+                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time)
 
-                    models.cron_info.objects.create(cron_name=name,cron_ip='ip',cron_task=i)
-
-                elif (i == '文件定时扫描'):
-                    scheduler.add_job(md5file, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
-                                      minute=minute, args=[serverid], second=second, id=str(name+i)),
-                elif (i == '进程定时扫描'):
-                    scheduler.add_job(process, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
-                                      minute=minute, args=[serverid], second=second, id=str(name+i)),
-                else:
-                    print("未选中定时任务选项")
+                    elif (i == '文件定时扫描'):
+                        scheduler.add_job(md5file, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
+                                          minute=minute, args=[serverid], second=second, id=str(name+i+x)),
+                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time)
+                    elif (i == '进程定时扫描'):
+                        scheduler.add_job(process, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
+                                          minute=minute, args=[serverid], second=second, id=str(name+i+x)),
+                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time)
+                    else:
+                        print("未选中定时任务选项")
             # job_name.remove()
             # if (id == '888'):
             #     scheduler.remove_job(jobname)
@@ -584,8 +587,8 @@ def PostAxios(request):
             'code': code,
             'message': message
         }
-        # return JsonResponse(json.dumps(back, ensure_ascii=False))
-        return JsonResponse("11111")
+        return JsonResponse(json.dumps(back, ensure_ascii=False))
+        # return JsonResponse("11111")
 
 #定时调用服务器出外网连接
 def port(queryset):
@@ -650,7 +653,7 @@ def port(queryset):
                                                             outgong_regionnum=2))
                 else:
                     print("未能识别该地址")
-                return pro_ip[0][0]
+                # return pro_ip[0][0]
         except Exception as  f:
             print(f)
     models.outgonging_detection.objects.bulk_create(outgong_dic)
@@ -700,5 +703,8 @@ register_events(scheduler)
 scheduler.start()
 # print(scheduler.get_jobs())
 # scheduler.remove_job('888')
+
+#关闭任务计划
+
 
 

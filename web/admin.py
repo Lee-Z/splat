@@ -491,7 +491,7 @@ class ChangeFile(admin.ModelAdmin):
 
 #定时任务信息
 class Cron(admin.ModelAdmin):
-    list_display = ['cron_name','cron_ip', 'cron_task', 'cron_strategy', 'cron_stat', 'cron_purpose']
+    list_display = ['cron_name','cron_ip', 'cron_task', 'cron_strategy', 'cron_stat', 'cron_purpose','cron_state']
     search_fields = ['cron_ip']
     list_filter = ['cron_ip']
     actions = ['crontbutton']
@@ -503,6 +503,21 @@ class Cron(admin.ModelAdmin):
     crontbutton.style = 'color:black;'
     crontbutton.action_type = 0
     crontbutton.action_url = 'http://127.0.0.1:8092/cronpage'
+
+    def cron_state(self, obj):
+
+        # btn1 = f"""<button  id='icon_{obj.cron_ip}' onclick='show_pic("{obj.cron_ip}")'
+        #                      class='el-button el-button--warning el-button--small'>添加至白名单</button>"""
+        btn1 = f"""<input
+  v-model="value2"
+  active-color="#13ce66"
+  inactive-color="#ff4949">
+</input>"""
+        return mark_safe(f"<div>{btn1}</div>")
+
+    # 以下语法替换 @admin.display(description='操作', ordering='id')
+    cron_state.short_description = '操作'
+    cron_state.admin_order_field = 'change_id'
 
 
 
