@@ -704,7 +704,9 @@ scheduler.start()
 # print(scheduler.get_jobs())
 # scheduler.remove_job('888')
 
-#关闭任务计划
+#暂停任务计划接口
+def stop_job(job_id):
+    pass
 
 
 

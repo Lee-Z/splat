@@ -491,7 +491,8 @@ class ChangeFile(admin.ModelAdmin):
 
 #定时任务信息
 class Cron(admin.ModelAdmin):
-    list_display = ['cron_name','cron_ip', 'cron_task', 'cron_strategy', 'cron_stat', 'cron_purpose','cron_state']
+    list_display = ['cron_name','cron_ip', 'cron_task', 'cron_strategy', 'cron_stat', 'cron_purpose',]
+    list_editable = ['cron_stat']
     search_fields = ['cron_ip']
     list_filter = ['cron_ip']
     actions = ['crontbutton']
@@ -504,20 +505,55 @@ class Cron(admin.ModelAdmin):
     crontbutton.action_type = 0
     crontbutton.action_url = 'http://127.0.0.1:8092/cronpage'
 
-    def cron_state(self, obj):
+    def has_add_permission(self, request):
+        # print("222")
+        # jobid = models.cron_info.objects.filter(cron_stat='0').values('cron_name','cron_task','cron_id')
+        # for i in jobid:
+        #     name = i['cron_name']
+        #     task = i['cron_task']
+        #     cronid = i['cron_id']
+        #     job_id = name+task+str(cronid)
+        #     models.scheduler.pause_job(job_id)
 
-        # btn1 = f"""<button  id='icon_{obj.cron_ip}' onclick='show_pic("{obj.cron_ip}")'
-        #                      class='el-button el-button--warning el-button--small'>添加至白名单</button>"""
-        btn1 = f"""<input
-  v-model="value2"
-  active-color="#13ce66"
-  inactive-color="#ff4949">
-</input>"""
-        return mark_safe(f"<div>{btn1}</div>")
+        return False
+    #重写页面 list_editable  编辑后 保存按钮
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        print('this is test')
+        if obj.cron_stat == 0:
+            print('已关闭定时任务')
+            serverid = models.Active_ip.objects.filter(ip=obj.cron_ip).values('id')
+            for sid in serverid:
+                serid = sid['id']
+                jobid = models.cron_info.objects.filter(cron_stat='0').values('cron_name','cron_task','cron_id')
+                print(jobid)
+                for i in jobid:
+                    name = i['cron_name']
+                    task = i['cron_task']
+                    cronid = i['cron_id']
+                    job_id = name+task+str(serid)
+                    print(job_id)
+                    models.scheduler.pause_job(job_id)
 
-    # 以下语法替换 @admin.display(description='操作', ordering='id')
-    cron_state.short_description = '操作'
-    cron_state.admin_order_field = 'change_id'
+        # if obj.action == 1:
+        #     # 通过
+        #     user_obj = models.UserInfo.objects.get(username=obj.username)
+        #     models.UserInfo.objects.filter(username=obj.username).update(money=user_obj.money + obj.money)
+        #     print('zidingyi save button')
+        # else:
+        #     pass
+
+    # def save_model(self, request, obj, form, change):
+    #     super().save_model(request, obj, form, change)
+    #     print("this is save post")
+    #     if obj.action == 1:
+    #         # 通过
+    #         user_obj = models.UserInfo.objects.get(username=obj.username)
+    #         models.UserInfo.objects.filter(username=obj.username).update(money=user_obj.money + obj.money)
+    #         print("this is save post")
+    #     else:
+    #         print("this is sava post")
+
 
 
 
