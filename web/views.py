@@ -700,7 +700,7 @@ def process(queryset):
 register_events(scheduler)
 # scheduler.remove_job('267ca7b905ac47598cd052799b87c555')
 
-scheduler.start()
+# scheduler.start()
 # print(scheduler.get_jobs())
 # scheduler.remove_job('888')
 

@@ -533,7 +533,27 @@ class Cron(admin.ModelAdmin):
                     cronid = i['cron_id']
                     job_id = name+task+str(serid)
                     print(job_id)
+                    if models.scheduler.state == 0 :
+                        models.scheduler.start()
+                    alljob = models.scheduler.get_jobs()
+                    print(alljob)
                     models.scheduler.pause_job(job_id)
+        elif obj.cron_stat == 1:
+            serverid = models.Active_ip.objects.filter(ip=obj.cron_ip).values('id')
+            for sid in serverid:
+                serid = sid['id']
+                jobid = models.cron_info.objects.filter(cron_stat='1').values('cron_name','cron_task','cron_id')
+                print(jobid)
+                for i in jobid:
+                    name = i['cron_name']
+                    task = i['cron_task']
+                    cronid = i['cron_id']
+                    job_id = name+task+str(serid)
+                    print(job_id)
+                    # models.scheduler.start()
+                    alljob = models.scheduler.get_jobs()
+                    # print(alljob)
+                    models.scheduler.resume_job(job_id)
 
         # if obj.action == 1:
         #     # 通过
