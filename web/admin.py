@@ -519,41 +519,53 @@ class Cron(admin.ModelAdmin):
     #重写页面 list_editable  编辑后 保存按钮
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        print('this is test')
+        # if obj.cron_stat == 0:
+        #     print('++++++++')
+        #     print('this is test111')
+        #     print('++++++++')
+        # elif obj.cron_stat == 1:
+        #     print('++++++++')
+        #     print('this is test222')
+        #     print('++++++++')
+        # jobid1 = models.cron_info.objects.filter(cron_stat='0').values('cron_name', 'cron_task', 'cron_id')
+        # print(jobid1)
+        if models.scheduler.state == 0:
+            models.scheduler.start()
+        #0 为开启任务  1为暂停任务
         if obj.cron_stat == 0:
-            print('已关闭定时任务')
-            serverid = models.Active_ip.objects.filter(ip=obj.cron_ip).values('id')
-            for sid in serverid:
-                serid = sid['id']
-                jobid = models.cron_info.objects.filter(cron_stat='0').values('cron_name','cron_task','cron_id')
-                print(jobid)
-                for i in jobid:
-                    name = i['cron_name']
-                    task = i['cron_task']
-                    cronid = i['cron_id']
-                    job_id = name+task+str(serid)
-                    print(job_id)
-                    if models.scheduler.state == 0 :
-                        models.scheduler.start()
-                    alljob = models.scheduler.get_jobs()
-                    print(alljob)
-                    models.scheduler.pause_job(job_id)
+            print('恢复定时任务')
+            # serverid = models.Active_ip.objects.filter(ip=obj.cron_ip).values('id')
+            # print(serverid)
+            # for sid in serverid:
+            #     serid = sid['id']
+            jobid = models.cron_info.objects.filter(cron_stat='0').values('cron_name','cron_task','cron_id')
+            for i in jobid:
+                name = i['cron_name']
+                task = i['cron_task']
+                cronid = i['cron_id']
+                activeip = models.cron_info.objects.filter(cron_id=cronid).values('cron_ip')
+                activeid = models.Active_ip.objects.filter(ip=activeip[0]['cron_ip']).values('id')
+                print(activeid)
+                job_id = name+task+str(activeid[0]['id'])
+                print(job_id)
+                # alljob = models.scheduler.get_jobs()
+                # print(alljob)
+                # 恢复job
+                models.scheduler.resume_job(job_id)
         elif obj.cron_stat == 1:
-            serverid = models.Active_ip.objects.filter(ip=obj.cron_ip).values('id')
-            for sid in serverid:
-                serid = sid['id']
-                jobid = models.cron_info.objects.filter(cron_stat='1').values('cron_name','cron_task','cron_id')
-                print(jobid)
-                for i in jobid:
-                    name = i['cron_name']
-                    task = i['cron_task']
-                    cronid = i['cron_id']
-                    job_id = name+task+str(serid)
-                    print(job_id)
-                    # models.scheduler.start()
-                    alljob = models.scheduler.get_jobs()
-                    # print(alljob)
-                    models.scheduler.resume_job(job_id)
+            jobid = models.cron_info.objects.filter(cron_stat='1').values('cron_name', 'cron_task', 'cron_id')
+            for i in jobid:
+                name = i['cron_name']
+                task = i['cron_task']
+                cronid = i['cron_id']
+                activeip = models.cron_info.objects.filter(cron_id=cronid).values('cron_ip')
+                activeid = models.Active_ip.objects.filter(ip=activeip[0]['cron_ip']).values('id')
+                job_id = name + task + str(activeid[0]['id'])
+                print(job_id)
+                # alljob = models.scheduler.get_jobs()
+                # print(alljob)
+                # 暂停job
+                models.scheduler.pause_job(job_id)
 
         # if obj.action == 1:
         #     # 通过

@@ -192,10 +192,10 @@ class cron_info(models.Model):
     cron_task = models.CharField("定时任务", max_length=2000)
     cron_strategy = models.CharField("定时策略", max_length=2000)
     cron_choices = (
-        (0, '关闭'),
-        (1, '开启'),
+        (0, '开启'),
+        (1, '关闭'),
     )
-    cron_stat = models.IntegerField(choices=cron_choices, verbose_name='关闭', default=0)
+    cron_stat = models.IntegerField(choices=cron_choices, verbose_name='状态', default=1)
     cron_purpose = models.CharField("备注", max_length=2000)
 
 

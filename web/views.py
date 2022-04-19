@@ -561,16 +561,16 @@ def PostAxios(request):
                         scheduler.add_job(port, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour, minute=minute, args=[serverid], second=second,id=str(name+i+x)),
                         # for x in serverid:
                         #     server_ip = (models.Active_ip.objects.filter(id=x).values_list('ip'))
-                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time)
+                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time,cron_stat=request.POST.get('status'))
 
                     elif (i == '文件定时扫描'):
                         scheduler.add_job(md5file, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
                                           minute=minute, args=[serverid], second=second, id=str(name+i+x)),
-                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time)
+                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time,cron_stat=request.POST.get('status'))
                     elif (i == '进程定时扫描'):
                         scheduler.add_job(process, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
                                           minute=minute, args=[serverid], second=second, id=str(name+i+x)),
-                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time)
+                        models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time,cron_stat=request.POST.get('status'))
                     else:
                         print("未选中定时任务选项")
             # job_name.remove()
@@ -595,10 +595,10 @@ def port(queryset):
     print("执行了任务计划")
     outgong_dic = list()
     for e in queryset:
-        print(e)
+        # print(e)
         try:
             pro_ip = (models.Active_ip.objects.filter(id=e).values_list('ip'))
-            print(pro_ip[0][0])
+            # print(pro_ip[0][0])
             url = "http://%s:8280/maintain/getIp" % (pro_ip[0][0])
             new_json = {
             }
@@ -611,12 +611,12 @@ def port(queryset):
                         yield (k, v)
 
             for k, v in itertransfer(res.json()):
-                print(k, v.split(':')[0])
+                # print(k, v.split(':')[0])
                 # ip = IP(v.split(':')[0])
                 ip = IP(v.split(':')[0])
                 # 外网返回：PUBLIC  内网：PRIVATE  127：LOOPBACK
                 if ip.iptype() == 'PRIVATE' or ip.iptype() == 'LOOPBACK':
-                    print("私网地址")
+                    # print("私网地址")
                     outgong_dic.append(
                         models.outgonging_detection(outgong_ip=pro_ip[0][0], outgong_connect=v.split(':')[0],
                                                     outgong_port=v.split(':')[1], outgong_addr="本地地址",
@@ -624,7 +624,7 @@ def port(queryset):
                 elif ip.iptype() == 'PUBLIC':
                     # 根据ip获取地址位置，并插入数据库
                     with geoip2.database.Reader('web/GeoLite2-City.mmdb') as reader:
-                        print(str(ip))
+                        # print(str(ip))
                         response = reader.city(str(ip))
                         if response.country.names['zh-CN'] == '中国':
                             # 省会
@@ -678,14 +678,14 @@ def process(queryset):
             }
             res = requests.post(url, json=new_json)
             if res:
-                print(type(res.json()))
+                # print(type(res.json()))
                 # print(res_list)
                 for x in res.json():
                     # 插入数据库
                     # models.IdcScan.objects.create(idc_ip=pro_ip[0][0],idc_command="ps",idc_status='0',idc_value=i)
                     a = models.process_whitelist.objects.filter(whitelist_process=x)
                     if a:
-                        print("添加白名单")
+                        # print("添加白名单")
                         res_list.append(
                             models.IdcScan(idc_ip=pro_ip[0][0], idc_command="ps", idc_status='1', idc_value=x))
                     else:
