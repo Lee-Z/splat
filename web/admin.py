@@ -163,7 +163,7 @@ class Agent(admin.ModelAdmin):
     port_scan.confirm = '是否确定扫描'
 
 
-    #家里报错
+    #报错
     # @admin.display(description='操作', ordering='id')
     def operate(self, obj):
         #注释的btn1 为弹出提示
@@ -495,15 +495,35 @@ class Cron(admin.ModelAdmin):
     list_editable = ['cron_stat']
     search_fields = ['cron_ip']
     list_filter = ['cron_ip']
-    actions = ['crontbutton']
+    actions = ['crontbutton','delete_selected']
     def crontbutton(self,request, queryset):
         pass
-    crontbutton.short_description = '新增定时任务'
-    crontbutton.icon = 'fas fa-audio-description'
+    crontbutton.short_description = '添加任务'
+    # crontbutton.icon = 'fas fa-audio-description'
     crontbutton.type = 'danger'
     crontbutton.style = 'color:black;'
     crontbutton.action_type = 0
     crontbutton.action_url = 'http://127.0.0.1:8092/cronpage'
+    #重写删除按钮
+    def delete_selected(modeladmin, request, queryset):
+        c = 0
+        for i in queryset:
+            print(i.cron_id)
+            cronname = models.cron_info.objects.filter(cron_id=i.cron_id).values('cron_task','cron_name')
+            activeid = models.Active_ip.objects.filter(ip=i.cron_ip).values('id')
+            if models.scheduler.state == 0:
+                models.scheduler.start()
+            job_id=cronname[0]['cron_name']+cronname[0]['cron_task']+str(activeid[0]['id'])
+            print(job_id)
+            models.scheduler.remove_job(job_id=job_id)
+            i.delete()
+            c += 1
+        msg = '成功删除了{}个表管理'.format(c)
+        #原作者写的删除后没提示，这里添加
+        modeladmin.message_user(request, msg)
+    delete_selected.short_description = '删除已选项'
+
+
 
     def has_add_permission(self, request):
         # print("222")

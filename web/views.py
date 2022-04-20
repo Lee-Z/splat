@@ -427,7 +427,8 @@ def grid_vertical() -> Grid:
             "",
             a,
             type_=ChartType.EFFECT_SCATTER,
-            color="red",
+            # color="red",
+            color="#6aa84f",
 
         )
         .add(
@@ -576,6 +577,8 @@ def PostAxios(request):
             # job_name.remove()
             # if (id == '888'):
             #     scheduler.remove_job(jobname)
+            #注册定时任务
+            register_events(scheduler)
             scheduler.start()
             code = '200'
             message = 'success'
