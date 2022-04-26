@@ -14,6 +14,8 @@ urlpatterns = [
     path('system/aserviceIp/contrast/', views.contrast),
     path('download', views.download),
     path('jsindex',views.index),
+    path('ipblacklist',views.ipblacklist),
+    path('extnetwork',views.extnetwork),
     path('getaxios',views.Getaxios),
     path('postaxios',views.PostAxios),
     url(r'^bar/$', views.ChartView.as_view(), name='demo'),

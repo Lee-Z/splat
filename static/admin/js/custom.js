@@ -18,7 +18,20 @@ function show_pic(idc_id) {
     // return idc_id
 }
 function outgongw(outgong_id) {
-    alert(outgong_id);
+    // alert(outgong_id);
+ $.ajax({
+    url: "/ipblacklist",
+    data: JSON.stringify({    // JSON格式封装数据
+        outgong_id: outgong_id,
+    }),
+    contentType: 'application/json',
+    type: "POST",
+    traditional: true,    // 需要传递列表、字典时加上这句
+    success: function(result) {
+    },
+    fail: function(result) {
+    }
+});
     // // $.post('/index')
     // return idc_id
 }

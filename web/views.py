@@ -76,6 +76,23 @@ def index(request):
     models.IdcScan.objects.filter(idc_id=idc_id).update(idc_status=1)
     return HttpResponse(idc_value)
 
+def ipblacklist(request):
+    json_receive = json.loads(request.body)
+    outgongid = json_receive['outgong_id']
+    ipconnect = models.outgonging_detection.objects.filter(outgong_id=outgongid).values('outgong_connect')
+    print("你点击了%s列"%outgongid)
+    #取出对应id的进程
+    outgong_connect = ipconnect[0]['outgong_connect']
+    models.ipaddress_blacklist.objects.get_or_create(blacklist_ip=outgong_connect)
+    print("已添加至黑名单")
+    models.outgonging_detection.objects.filter(outgong_id=outgongid).update(outgong_status=1)
+    return HttpResponse(outgong_connect)
+
+
+
+
+
+
 # 字典镶嵌字典遍历 {a:{b:c,d:e}},并写入数据库
 def list_all_dict(dict_a,serverip,datapath):
     md5_dic = list()
@@ -384,12 +401,11 @@ c = [1420, 94, 86, 107, 33, 48, 134,22]
 d = ["新疆", "黑龙江", "四川", "广东", "吉林", "西藏", "海南","北京"]
 g = int()
 k = []
-nowdate = datetime.datetime.now().date()
 def mapdata():
     global g
-
+    nowdate = datetime.datetime.now().date()
     f = models.outgonging_detection.objects.filter(outgong_regionnum=1, outgong_id__gt=g,outgong_scan_time__gte=nowdate).values('outgong_addr', 'outgong_id')
-    print("++++++++++++++++++++++")
+    # print("++++++++++++++++++++++")
     for i in f:
         print(i['outgong_addr'])
         g = i['outgong_id']
@@ -400,6 +416,7 @@ def mapdata():
 
 
 def bardata():
+    nowdate = datetime.datetime.now().date()
     #select outgong_addr,count(outgong_addr) as outcount from web_outgonging_detection group by outgong_addr;
     objs = models.outgonging_detection.objects.values('outgong_addr').filter(outgong_network=1,outgong_scan_time__gte=nowdate).annotate(
         outcount=Count('outgong_addr'))
@@ -423,14 +440,13 @@ def grid_vertical() -> Grid:
             is_roam=False,
             # legend_opts=opts.LegendOpts(pos_left="80%")
         )
-        .add(
-            "",
-            a,
-            type_=ChartType.EFFECT_SCATTER,
-            # color="red",
-            color="#6aa84f",
-
-        )
+        # .add(
+        #     "",
+        #     a,
+        #     type_=ChartType.EFFECT_SCATTER,
+        #     # color="red",
+        #     color="#6aa84f",
+        # )
         .add(
             "",
             mapdata(),
@@ -563,15 +579,21 @@ def PostAxios(request):
                         # for x in serverid:
                         #     server_ip = (models.Active_ip.objects.filter(id=x).values_list('ip'))
                         models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time,cron_stat=request.POST.get('status'))
+                        if request.POST.get('status') == '1':
+                            scheduler.pause_job(str(name+i+x))
 
                     elif (i == '文件定时扫描'):
                         scheduler.add_job(md5file, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
                                           minute=minute, args=[serverid], second=second, id=str(name+i+x)),
                         models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time,cron_stat=request.POST.get('status'))
+                        if request.POST.get('status') == '1':
+                            scheduler.pause_job(str(name+i+x))
                     elif (i == '进程定时扫描'):
                         scheduler.add_job(process, 'cron', year=year, day_of_week=week, month=mon, day=day, hour=hour,
                                           minute=minute, args=[serverid], second=second, id=str(name+i+x)),
                         models.cron_info.objects.create(cron_name=name,cron_ip=server_ip,cron_task=i,cron_strategy=start_time,cron_stat=request.POST.get('status'))
+                        if request.POST.get('status') == '1':
+                            scheduler.pause_job(str(name+i+x))
                     else:
                         print("未选中定时任务选项")
             # job_name.remove()
@@ -617,45 +639,51 @@ def port(queryset):
                 # print(k, v.split(':')[0])
                 # ip = IP(v.split(':')[0])
                 ip = IP(v.split(':')[0])
-                # 外网返回：PUBLIC  内网：PRIVATE  127：LOOPBACK
-                if ip.iptype() == 'PRIVATE' or ip.iptype() == 'LOOPBACK':
-                    # print("私网地址")
-                    outgong_dic.append(
-                        models.outgonging_detection(outgong_ip=pro_ip[0][0], outgong_connect=v.split(':')[0],
-                                                    outgong_port=v.split(':')[1], outgong_addr="本地地址",
-                                                    outgong_scan_time=k, outgong_network=0))
-                elif ip.iptype() == 'PUBLIC':
-                    # 根据ip获取地址位置，并插入数据库
-                    with geoip2.database.Reader('web/GeoLite2-City.mmdb') as reader:
-                        # print(str(ip))
-                        response = reader.city(str(ip))
-                        if response.country.names['zh-CN'] == '中国':
-                            # 省会
-                            province = response.subdivisions.most_specific.names['zh-CN']
-                            # 城市
-                            city = response.city.names['zh-CN']
-                            # geographical_position = '{}{}'.format(province,city)
-                            geographical_position = '{}'.format(province)
-                            outgong_dic.append(
-                                models.outgonging_detection(outgong_ip=pro_ip[0][0],
-                                                            outgong_connect=v.split(':')[0],
-                                                            outgong_port=v.split(':')[1],
-                                                            outgong_addr=geographical_position,
-                                                            outgong_scan_time=k, outgong_network=1,
-                                                            outgong_regionnum=1))
-                        else:
-                            province = response.subdivisions.most_specific.name
-                            city = response.city.name
-                            geographical_position = '{}'.format(response.country.names['zh-CN'])
-                            outgong_dic.append(
-                                models.outgonging_detection(outgong_ip=pro_ip[0][0],
-                                                            outgong_connect=v.split(':')[0],
-                                                            outgong_port=v.split(':')[1],
-                                                            outgong_addr=geographical_position,
-                                                            outgong_scan_time=k, outgong_network=1,
-                                                            outgong_regionnum=2))
+                daydate =  datetime.datetime.now().date()
+                objs = models.outgonging_detection.objects.filter(outgong_connect=ip,outgong_scan_time__gte=daydate).values('outgong_id')
+                if objs:
+                    # 端口扫描今天已存在数据库有该ip访问
+                    print('为真有值')
                 else:
-                    print("未能识别该地址")
+                    # 外网返回：PUBLIC  内网：PRIVATE  127：LOOPBACK
+                    if ip.iptype() == 'PRIVATE' or ip.iptype() == 'LOOPBACK':
+                        # print("私网地址")
+                        outgong_dic.append(
+                            models.outgonging_detection(outgong_ip=pro_ip[0][0], outgong_connect=v.split(':')[0],
+                                                        outgong_port=v.split(':')[1], outgong_addr="本地地址",
+                                                        outgong_scan_time=k, outgong_network=0))
+                    elif ip.iptype() == 'PUBLIC':
+                        # 根据ip获取地址位置，并插入数据库
+                        with geoip2.database.Reader('web/GeoLite2-City.mmdb') as reader:
+                            # print(str(ip))
+                            response = reader.city(str(ip))
+                            if response.country.names['zh-CN'] == '中国':
+                                # 省会
+                                province = response.subdivisions.most_specific.names['zh-CN']
+                                # 城市
+                                city = response.city.names['zh-CN']
+                                # geographical_position = '{}{}'.format(province,city)
+                                geographical_position = '{}'.format(province)
+                                outgong_dic.append(
+                                    models.outgonging_detection(outgong_ip=pro_ip[0][0],
+                                                                outgong_connect=v.split(':')[0],
+                                                                outgong_port=v.split(':')[1],
+                                                                outgong_addr=geographical_position,
+                                                                outgong_scan_time=k, outgong_network=1,
+                                                                outgong_regionnum=1))
+                            else:
+                                province = response.subdivisions.most_specific.name
+                                city = response.city.name
+                                geographical_position = '{}'.format(response.country.names['zh-CN'])
+                                outgong_dic.append(
+                                    models.outgonging_detection(outgong_ip=pro_ip[0][0],
+                                                                outgong_connect=v.split(':')[0],
+                                                                outgong_port=v.split(':')[1],
+                                                                outgong_addr=geographical_position,
+                                                                outgong_scan_time=k, outgong_network=1,
+                                                                outgong_regionnum=2))
+                    else:
+                        print("未能识别该地址")
                 # return pro_ip[0][0]
         except Exception as  f:
             print(f)
@@ -708,8 +736,10 @@ register_events(scheduler)
 # scheduler.remove_job('888')
 
 #暂停任务计划接口
-def stop_job(job_id):
-    pass
+def extnetwork(request):
+    if request.method == 'POST':
+        print("post 点解出网")
+    return HttpResponse("You just need get method")
 
 
 

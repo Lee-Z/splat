@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = '#2etqz-s!5^z_1z=^k&!#2an_b=a$@7(d@x6)$51r&y+=_%#-h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -154,7 +154,7 @@ SIMPLEUI_LOADING = False
 #菜单设置
 SIMPLEUI_CONFIG = {
     'system_keep': True,
-    'menu_display': ['服务器扫描','多级菜单测试', '权限认证', '动态菜单测试'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
+    'menu_display': ['服务器扫描','黑白名单','多级菜单测试', '权限认证', '动态菜单测试'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
     'dynamic': True,    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时动态展示菜单内容
     'menus': [{
         'name': 'Simpleui',
@@ -181,11 +181,7 @@ SIMPLEUI_CONFIG = {
             'url': 'web/idcscan',
             'icon': 'fab fa-github'
         },{
-            'name': '进程白名单',
-            'url': 'web/process_whitelist',
-            'icon': 'fab fa-github'
-        },{
-            'name': '服务器出网检测',
+            'name': '网络连接检测',
             'url': 'web/outgonging_detection',
             'icon': 'fab fa-github'
         },{
@@ -200,6 +196,22 @@ SIMPLEUI_CONFIG = {
             'name': '定时任务',
             'url': 'web/cron_info',
             'icon': 'fab fa-github'
+        },{
+            'name': '外网连接',
+            'url': 'web/expnetwork_info',
+            'icon': 'fab fa-github'
+        }]
+    },{
+        'name': '黑白名单',
+        'icon': 'far fa-surprise',
+        'models': [{
+            'name': '进程白名单',
+            'icon': 'fa fa-user',
+            'url': 'web/process_whitelist'
+        },{
+            'name': 'ip黑名单',
+            'icon': 'fab fa-github',
+            'url': 'web/ipaddress_blacklist'
         }]
     },{
         # 自2021.02.01+ 支持多级菜单，models 为子菜单名

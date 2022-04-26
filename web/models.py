@@ -117,6 +117,12 @@ class process_whitelist(models.Model):
     whitelist_time = models.DateTimeField("创建时间", auto_now_add=True)
     whitelist_purpose = models.CharField("备注", max_length=2000)
 
+#ip地址黑名单表
+class ipaddress_blacklist(models.Model):
+    blacklist_id = models.AutoField("序列号",primary_key=True)
+    blacklist_ip = models.CharField("异常ip", max_length=2000)
+    blacklist_time = models.DateTimeField("创建时间", auto_now_add=True)
+    blacklist_purpose = models.CharField("备注", max_length=2000)
 
 #服务器出网检测列表
 class outgonging_detection(models.Model):
@@ -198,7 +204,15 @@ class cron_info(models.Model):
     cron_stat = models.IntegerField(choices=cron_choices, verbose_name='状态', default=1)
     cron_purpose = models.CharField("备注", max_length=2000)
 
-
+class expnetwork_info(models.Model):
+    expnetwork_id = models.AutoField("序列号",primary_key=True)
+    expnetwork_ip = models.CharField("项目IP", max_length=2000)
+    expnetwork_scantime = models.DateTimeField("扫描时间", auto_now_add=True)
+    expnetwork_choices = (
+        (0, '开通访问'),
+        (1, '关闭访问'),
+    )
+    expnetwork_stat = models.IntegerField(choices=expnetwork_choices, verbose_name='状态', default=1)
 
 
 
