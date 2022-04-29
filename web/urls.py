@@ -9,6 +9,7 @@ from django.conf.urls import url ##新增
 urlpatterns = [
     path('dashboard', views.dashboard, name='dashboard'),
     path('cronpage', views.cronpage, name='cronpage'),
+    path('addextpage', views.addextpage, name='cronpage'),
     path('system/aserviceIp/monitor/', views.test_ajax),
     path('system/aserviceIp/obtain/', views.obtain),
     path('system/aserviceIp/contrast/', views.contrast),

@@ -213,6 +213,7 @@ class expnetwork_info(models.Model):
         (1, '关闭访问'),
     )
     expnetwork_stat = models.IntegerField(choices=expnetwork_choices, verbose_name='状态', default=1)
+    expnetwork_purpose = models.CharField("测试地址", max_length=2000,default='baidu.com')
 
 
 

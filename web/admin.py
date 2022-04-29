@@ -108,8 +108,6 @@ class Agent(admin.ModelAdmin):
                     new_json = {
                     }
                     res = requests.post(url, json=new_json)
-                    nowdate = datetime.datetime.now().date()
-                    print(nowdate)
 
                     #该函数为 字典1个key值对应多个value值改成1个key值对应一个value值
                     def itertransfer(mapper):
@@ -120,6 +118,7 @@ class Agent(admin.ModelAdmin):
                         print(k,v.split(':')[0])
                         # ip = IP(v.split(':')[0])
                         ip = IP(v.split(':')[0])
+                        nowdate = datetime.datetime.now().date()
                         objs = models.outgonging_detection.objects.filter(outgong_connect=ip,outgong_scan_time__gte=nowdate).values('outgong_id')
                         if objs:
                             #端口扫描今天已存在数据库有该ip访问
@@ -625,12 +624,23 @@ class Cron(admin.ModelAdmin):
 
 
 
-#出网扫描
+#外网连接
 class Expnetwork(admin.ModelAdmin):
-    list_display = ['expnetwork_id', 'expnetwork_ip', 'expnetwork_stat', 'expnetwork_scantime', ]
+    list_display = ['expnetwork_id', 'expnetwork_ip', 'expnetwork_stat', 'expnetwork_purpose','expnetwork_scantime', ]
     # list_editable = ['cron_stat']
     search_fields = ['expnetwork_scantime']
     list_filter = ['expnetwork_scantime']
+    actions = ['addnetpage']
+
+    def addnetpage(self, request, queryset):
+        pass
+
+    addnetpage.short_description = '添加任务'
+    # crontbutton.icon = 'fas fa-audio-description'
+    addnetpage.type = 'danger'
+    addnetpage.style = 'color:black;'
+    addnetpage.action_type = 0
+    addnetpage.action_url = 'http://127.0.0.1:8092/addextpage'
 
 
 

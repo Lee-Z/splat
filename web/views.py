@@ -737,9 +737,28 @@ register_events(scheduler)
 
 #暂停任务计划接口
 def extnetwork(request):
+    netlist = list()
     if request.method == 'POST':
-        print("post 点解出网")
-    return HttpResponse("You just need get method")
+        serverid = request.POST.get('serverip').split(',')
+        netaddress = request.POST.get('netaddress')
+        data = {'domainName': netaddress}
+        for i in serverid:
+            aip = models.Active_ip.objects.filter(id=i).values_list('ip')
+            print(aip[0][0])
+            url = "http://%s:8280/maintain/telnet" % (aip[0][0])
+            res = requests.post(url, data=data)
+            if 'Escape' in res.text:
+                netlist.append(
+                    models.expnetwork_info(expnetwork_ip=aip[0][0], expnetwork_stat="0",expnetwork_purpose=netaddress))
+            else:
+                netlist.append(
+                    models.expnetwork_info(expnetwork_ip=aip[0][0], expnetwork_stat="1",expnetwork_purpose=netaddress))
+    models.expnetwork_info.objects.bulk_create(netlist)
+    return HttpResponse("200")
+
+def addextpage(request):
+    # return render(request, 'dashboard.html',context)
+    return render(request, 'addpage.html')
 
 
 
