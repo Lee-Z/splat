@@ -194,7 +194,7 @@ def contrast(request):
                         host_ini = os.path.basename(temp_value['路径'])
                         #获取文件路径
                         directory = os.path.dirname(temp_value['路径'])
-                        hostpath = '/Users/app/'
+                        hostpath = '/opt/msyd_scan/server/data/'
                         print(ip)
                         #存在全路径拼接
                         # allpath = os.path.join(hostpath,ip,directory)
@@ -215,8 +215,17 @@ def contrast(request):
                     res = requests.post(url, headers=headers)
                     # print(res.text)
                     host_ini = os.path.basename(temp_value['路径'])
-                    print(host_ini)
-                    filename = 'C:\iso\%s' % host_ini
+                    # 获取文件路径
+                    directory = os.path.dirname(temp_value['路径'])
+                    hostpath = '/opt/msyd_scan/server/data/'
+                    print(ip)
+                    # 存在全路径拼接
+                    # allpath = os.path.join(hostpath,ip,directory)
+                    allpath = hostpath + ip + directory
+                    if not os.path.exists(allpath): os.makedirs(allpath)
+                    # filename = 'C:\iso\%s' % host_ini
+                    filename = '%s/%s' % (allpath, host_ini)
+                    # filename = 'C:\iso\%s' % host_ini
                     with open(filename, 'wb') as file:
                         file.write(res.content)
         #将数据库文件 与 扫描出来的文件相减
@@ -241,7 +250,7 @@ def download(request):
     ip = db_ip[0]['change_ip']
     #/opt/msyd_scan/server/download 生产路径
     # file_path = 'C:/iso/%s' % file_name
-    all_path = '/Users/app/%s/%s' % (ip,path_name)
+    all_path = '/opt/msyd_scan/server/data/%s%s' % (ip,path_name)
     # if not os.path.isfile(file_path):  # 判断下载文件是否存在
     #     return HttpResponse("Sorry but Not Found the File")
     file = open(all_path, 'rb')
