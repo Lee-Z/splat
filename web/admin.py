@@ -223,7 +223,8 @@ class Idc(admin.ModelAdmin):
     search_fields = ['idc_status', 'idc_ip','idc_value']
 #    list_editable = ['idc_ip','idc_status']
     list_filter = ['idc_status']
-
+    #禁用编辑链接
+    list_display_links = None
     # 隐藏增加按钮
     def has_add_permission(self, request):
         return False
@@ -471,6 +472,8 @@ class outgonging_detection(admin.ModelAdmin):
               #   也可以挂载cdn文件，这里仅示例
               #  'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js',
              )
+    # 禁用编辑链接
+    list_display_links = None
     # 隐藏增加按钮
     def has_add_permission(self, request):
         return False
@@ -522,7 +525,8 @@ class ChangeFile(admin.ModelAdmin):
     #以下语法替换 @admin.display(description='操作', ordering='id')
     change_down.short_description = '操作'
     change_down.admin_order_field = 'change_id'
-
+    # 禁用编辑链接
+    list_display_links = None
     # 隐藏增加按钮
     def has_add_permission(self, request):
         return False
@@ -668,6 +672,8 @@ class Expnetwork(admin.ModelAdmin):
     addnetpage.style = 'color:black;'
     addnetpage.action_type = 0
     addnetpage.action_url = 'http://127.0.0.1:8092/addextpage'
+    # 禁用编辑链接
+    list_display_links = None
     #隐藏增加按钮
     def has_add_permission(self, request):
         return False
