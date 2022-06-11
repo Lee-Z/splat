@@ -16,9 +16,10 @@ import datetime
 
 #客户端列表显示
 class Agent(admin.ModelAdmin):
-    list_display = ['ip','statusColored','create_time','operate']
+    list_display = ['ip','statusColored','create_time','purpose','operate']
     search_fields = ['ip', 'state','create_time']
 #    list_editable = ['idc_ip','idc_status']
+    fields = ['ip','purpose']
     list_filter = ['create_time']
 
     def statusColored(self, obj):
@@ -199,6 +200,12 @@ class process_list(admin.ModelAdmin):
     list_filter = ['whitelist_time']
 #   #设置哪些字段可以点击进入编辑界面
 #     list_display_links = ['id', 'caption']
+    # 隐藏增加按钮
+    def has_add_permission(self, request):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        # 禁用删除按钮
+        return False
 
 #ip异常ip名单显示设置
 class ipaddress_blacklist(admin.ModelAdmin):
@@ -216,6 +223,13 @@ class Idc(admin.ModelAdmin):
     search_fields = ['idc_status', 'idc_ip','idc_value']
 #    list_editable = ['idc_ip','idc_status']
     list_filter = ['idc_status']
+
+    # 隐藏增加按钮
+    def has_add_permission(self, request):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        # 禁用删除按钮
+        return False
     # #删除自带添加按钮
     # def has_add_permission(self, request):
     #     return False
@@ -303,7 +317,8 @@ class Idc(admin.ModelAdmin):
 #     delete_button.action_url = 'http://www.baidu.com'
 
 
-    actions = ('layer_input',)
+#页面上面弹出按钮输入框
+#    actions = ('layer_input',)
 
     def layer_input(self, request, queryset):
         # 这里的queryset 会有数据过滤，只包含选中的数据
@@ -438,7 +453,7 @@ class Idc(admin.ModelAdmin):
         }]
     }
 
-#服务器出网检测显示
+#网络连接检测显示
 class outgonging_detection(admin.ModelAdmin):
     list_display = ['outgong_ip','outgong_connect','outgong_port','outgong_addr','outgong_status','outgong_scan_time','outgong_purpose','outgong_whitelist']
     search_fields = ['outgong_ip','outgong_connect']
@@ -456,7 +471,12 @@ class outgonging_detection(admin.ModelAdmin):
               #   也可以挂载cdn文件，这里仅示例
               #  'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js',
              )
-
+    # 隐藏增加按钮
+    def has_add_permission(self, request):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        # 禁用删除按钮
+        return False
 
 #文件完整性列表显示
 class ProjectInfo(admin.ModelAdmin):
@@ -503,6 +523,13 @@ class ChangeFile(admin.ModelAdmin):
     change_down.short_description = '操作'
     change_down.admin_order_field = 'change_id'
 
+    # 隐藏增加按钮
+    def has_add_permission(self, request):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        # 禁用删除按钮
+        return False
+
 
 
 #定时任务信息
@@ -540,7 +567,7 @@ class Cron(admin.ModelAdmin):
     delete_selected.short_description = '删除已选项'
 
 
-
+    #隐藏增加按钮
     def has_add_permission(self, request):
         # print("222")
         # jobid = models.cron_info.objects.filter(cron_stat='0').values('cron_name','cron_task','cron_id')
@@ -641,6 +668,9 @@ class Expnetwork(admin.ModelAdmin):
     addnetpage.style = 'color:black;'
     addnetpage.action_type = 0
     addnetpage.action_url = 'http://127.0.0.1:8092/addextpage'
+    #隐藏增加按钮
+    def has_add_permission(self, request):
+        return False
 
 
 

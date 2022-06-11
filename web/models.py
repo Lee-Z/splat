@@ -89,6 +89,11 @@ class Active_ip(models.Model):
         (2,'未注册')
     )
     status = models.IntegerField( choices=statusChoices,verbose_name='状态' , default=0 )
+    def __str__(self):
+        return self.ip
+    class Meta:
+        verbose_name = '客户端列表'
+        verbose_name_plural = '客户端列表'
     # 在每列后面添加单个按钮
     # def pass_audit_str2(self):
     #     # parameter_str = 'id={}&status={}'.format(str(self.id), str(self.status))
@@ -170,6 +175,9 @@ class project_info(models.Model):
     project_special = models.CharField("排除文件", max_length=2000)
     project_updatetime = models.DateTimeField("更新时间", auto_now_add=True)
     project_sete = models.CharField("状态", max_length=200)
+    class Meta:
+        verbose_name = '扫描目录'
+        verbose_name_plural = '扫描目录'
 
 #异常变动文件表
 class change_file(models.Model):

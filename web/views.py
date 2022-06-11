@@ -240,24 +240,33 @@ def contrast(request):
 
 #异常文件下载
 def download(request):
-    change_id = request.GET.get('change_id')
-    # models.change_file.objects.filter(change_id=change_id).values(change_url)
-    # file_name = os.path.basename(file_path)
-    path_file_name = models.change_file.objects.filter(change_id=change_id).values('change_url')
-    file_name = os.path.basename(path_file_name[0]['change_url'])
-    path_name = path_file_name[0]['change_url']
-    db_ip = models.change_file.objects.filter(change_id=change_id).values('change_ip')
-    ip = db_ip[0]['change_ip']
-    #/opt/msyd_scan/server/download 生产路径
-    # file_path = 'C:/iso/%s' % file_name
-    all_path = '/opt/msyd_scan/server/data/%s%s' % (ip,path_name)
-    # if not os.path.isfile(file_path):  # 判断下载文件是否存在
-    #     return HttpResponse("Sorry but Not Found the File")
-    file = open(all_path, 'rb')
-    response = FileResponse(file)
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename=%s' %(file_name)
-    return response
+    try:
+        change_id = request.GET.get('change_id')
+        # models.change_file.objects.filter(change_id=change_id).values(change_url)
+        # file_name = os.path.basename(file_path)
+        path_file_name = models.change_file.objects.filter(change_id=change_id).values('change_url')
+        file_name = os.path.basename(path_file_name[0]['change_url'])
+        path_name = path_file_name[0]['change_url']
+        db_ip = models.change_file.objects.filter(change_id=change_id).values('change_ip')
+        ip = db_ip[0]['change_ip']
+        #/opt/msyd_scan/server/download 生产路径
+        # file_path = 'C:/iso/%s' % file_name
+        all_path = '/opt/msyd_scan/server/data/%s%s' % (ip,path_name)
+        # if not os.path.isfile(file_path):  # 判断下载文件是否存在
+        #     return HttpResponse("Sorry but Not Found the File")
+        file = open(all_path, 'rb')
+        response = FileResponse(file)
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename=%s' %(file_name)
+        # return response
+    except Exception as e:
+        code = '404'
+        message = "文件被删除"
+    back = {
+        'code': code,
+        'message': message
+    }
+    return JsonResponse(json.dumps(back, ensure_ascii=False))
 
 
 
@@ -767,6 +776,7 @@ def extnetwork(request):
 
 def addextpage(request):
     # return render(request, 'dashboard.html',context)
+    # print(request.META.get('REMOTE_ADDR'))
     return render(request, 'addpage.html')
 
 
