@@ -1,3 +1,4 @@
+import web.views
 from web import views
 from django.urls import path
 #调用新增定时计划
@@ -9,6 +10,7 @@ from django.conf.urls import url ##新增
 urlpatterns = [
     path('dashboard', views.dashboard, name='dashboard'),
     path('cronpage', views.cronpage, name='cronpage'),
+    path('connect', views.SshConnect, name='connect'),
     path('addextpage', views.addextpage, name='cronpage'),
     path('system/aserviceIp/monitor/', views.test_ajax),
     path('system/aserviceIp/obtain/', views.obtain),
@@ -34,4 +36,5 @@ urlpatterns = [
     url(r'^page/$', views.ChartView.as_view(), name='demo'),
     url(r'^pageUpdate/$', views.ChartUpdateView.as_view(), name='demo'),
 ]
+handler404 = views.page_not_found
 

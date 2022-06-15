@@ -32,14 +32,17 @@ from django_apscheduler.jobstores import DjangoJobStore, register_events, regist
 from web import admin
 from IPy import IP
 import geoip2.database
-
+from django.shortcuts import render
+import paramiko
 
 def cronpage(request):
 
     # return render(request, 'dashboard.html',context)
     return render(request, 'cronindex.html')
 
-
+#404页面设置
+def page_not_found(request, exception):
+    return render(request, '404.html', status=404)
 
 def dashboard(request):
     user_count = User.objects.count()
@@ -258,7 +261,7 @@ def download(request):
         response = FileResponse(file)
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename=%s' %(file_name)
-        # return response
+        return response
     except Exception as e:
         code = '404'
         message = "文件被删除"
@@ -266,8 +269,8 @@ def download(request):
         'code': code,
         'message': message
     }
-    return JsonResponse(json.dumps(back, ensure_ascii=False))
-
+    # return JsonResponse(json.dumps(back, ensure_ascii=False))
+    return render(request, '404.html', status=404)
 
 
 
@@ -780,4 +783,29 @@ def addextpage(request):
     return render(request, 'addpage.html')
 
 
+#远程安装客户端接口
+def SshConnect(request):
+    if request.method == 'POST':
+        ssh = paramiko.SSHClient()
+        # 允许将信任的主机自动加入到host_allow 列表，此方法必须放在connect方法的前面
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # 调用connect方法连接服务器
+        json_receive = json.loads(request.body)
+        serverip = json_receive['serverip']
+        port = json_receive['port']
+        username = json_receive['username']
+        password = json_receive['password']
+
+        ssh.connect(hostname=serverip, port=port, username=username, password=password)
+        # 手动输入待执行命令
+        mycmd = 'curl http://172.30.2.1/download/agent.sh | bash -s init'
+        stdin, stdout, stderr = ssh.exec_command(mycmd)
+        # 直接执行指定命令
+        # ssh.exec_command('w')
+        # 结果放到stdout中，如果有错误将放到stderr中
+        print(stdout.read().decode())
+        print(stderr.read().decode())
+        # 关闭连接
+        ssh.close()
+        return HttpResponse('200')
 

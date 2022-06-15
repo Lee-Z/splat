@@ -11,11 +11,14 @@ from django.http import HttpResponse
 from django.utils.html import format_html
 import os
 import datetime
+from simpleui.admin import AjaxAdmin
 
 
 
 #客户端列表显示
-class Agent(admin.ModelAdmin):
+# class Agent(admin.ModelAdmin,AjaxAdmin,):
+class Agent(AjaxAdmin):
+
     list_display = ['ip','statusColored','create_time','purpose','operate']
     search_fields = ['ip', 'state','create_time']
 #    list_editable = ['idc_ip','idc_status']
@@ -34,7 +37,7 @@ class Agent(admin.ModelAdmin):
     statusColored.admin_order_field = 'status'
 
     #页面上面添加按钮
-    actions = ['custom_button','pro_scan','port_scan']
+    actions = ['custom_button','pro_scan','port_scan','layer_input']
     def custom_button(self, request, queryset):
         print(queryset)
         if request.method == 'POST':
@@ -192,6 +195,96 @@ class Agent(admin.ModelAdmin):
     operate.short_description = '操作'
     operate.admin_order_field = 'id'
 
+
+    def layer_input(self, request, queryset):
+        # 这里的queryset 会有数据过滤，只包含选中的数据
+        print("111111111111")
+        post = request.POST
+        # 这里获取到数据后，可以做些业务处理
+        serverip = request.POST.get("serverip")
+        port = request.POST.get("port")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        url = "http://127.0.0.1:8092/connect"
+        new_json = {
+            'serverip':serverip,
+            'port':port,
+            'username':username,
+            'password':password
+        }
+        res = requests.post(url, json=new_json)
+        # print(res.text)
+
+        # post中的_action 是方法名
+        # post中 _selected 是选中的数据，逗号分割
+        return JsonResponse(data={
+            'status': 'success',
+            'msg': '处理成功！'
+        })
+
+    layer_input.short_description = 'Agent安装'
+    layer_input.type = 'success'
+    layer_input.icon = 'el-icon-s-promotion'
+    # 指定一个输入参数，应该是一个数组
+
+    # 指定为弹出层，这个参数最关键
+    layer_input.layer = {
+        # 弹出层中的输入框配置
+
+        # 这里指定对话框的标题
+        'title': '添加客户端',
+        # 提示信息
+        'tips': '新增Agent',
+        # 确认按钮显示文本
+        'confirm_button': '确认提交',
+        # 取消按钮显示文本
+        'cancel_button': '取消',
+
+        # 弹出层对话框的宽度，默认50%
+        'width': '60%',
+
+        # 表单中 label的宽度，对应element-ui的 label-width，默认80px
+        'labelWidth': "80px",
+        'params': [{
+            # 这里的type 对应el-input的原生input属性，默认为input
+            'type': 'input',
+            # key 对应post参数中的key
+            'key': 'serverip',
+            # 显示的文本
+            'label': '服务器ip',
+            # 为空校验，默认为False
+            'require': True
+        },{
+            # 这里的type 对应el-input的原生input属性，默认为input
+            'type': 'input',
+            # key 对应post参数中的key
+            'key': 'port',
+            # 显示的文本
+            'label': '端口',
+            # 为空校验，默认为False
+            'require': True
+        },{
+            # 这里的type 对应el-input的原生input属性，默认为input
+            'type': 'input',
+            # key 对应post参数中的key
+            'key': 'username',
+            # 显示的文本
+            'label': '用户',
+            # 为空校验，默认为False
+            'require': True
+        },{
+            # 这里的type 对应el-input的原生input属性，默认为input
+            'type': 'input',
+            # key 对应post参数中的key
+            'key': 'password',
+            # 显示的文本
+            'label': '密码',
+            # 为空校验，默认为False
+            'require': True
+        }]
+    }
+
+
 #进程白名单显示设置
 class process_list(admin.ModelAdmin):
     list_display = ['whitelist_id','whitelist_process','whitelist_time','whitelist_purpose']
@@ -317,142 +410,6 @@ class Idc(admin.ModelAdmin):
 #     delete_button.action_type = 0
 #     delete_button.action_url = 'http://www.baidu.com'
 
-
-#页面上面弹出按钮输入框
-#    actions = ('layer_input',)
-
-    def layer_input(self, request, queryset):
-        # 这里的queryset 会有数据过滤，只包含选中的数据
-
-        post = request.POST
-        # 这里获取到数据后，可以做些业务处理
-        # post中的_action 是方法名
-        # post中 _selected 是选中的数据，逗号分割
-        if not post.get('_selected'):
-            return JsonResponse(data={
-                'status': 'error',
-                'msg': '请先选中数据！'
-            })
-        else:
-            return JsonResponse(data={
-                'status': 'success',
-                'msg': '处理成功！'
-            })
-
-    layer_input.short_description = '弹出对话框输入'
-    layer_input.type = 'success'
-    layer_input.icon = 'el-icon-s-promotion'
-    # 指定一个输入参数，应该是一个数组
-
-    # 指定为弹出层，这个参数最关键
-    layer_input.layer = {
-        # 弹出层中的输入框配置
-
-        # 这里指定对话框的标题
-        'title': '弹出层输入框',
-        # 提示信息
-        'tips': '这个弹出对话框是需要在admin中进行定义，数据新增编辑等功能，需要自己来实现。',
-        # 确认按钮显示文本
-        'confirm_button': '确认提交',
-        # 取消按钮显示文本
-        'cancel_button': '取消',
-
-        # 弹出层对话框的宽度，默认50%
-        'width': '40%',
-
-        # 表单中 label的宽度，对应element-ui的 label-width，默认80px
-        'labelWidth': "80px",
-        'params': [{
-            # 这里的type 对应el-input的原生input属性，默认为input
-            'type': 'input',
-            # key 对应post参数中的key
-            'key': 'name',
-            # 显示的文本
-            'label': '名称',
-            # 为空校验，默认为False
-            'require': True
-        }, {
-            'type': 'select',
-            'key': 'type',
-            'label': '类型',
-            'width': '200px',
-            # size对应elementui的size，取值为：medium / small / mini
-            'size': 'small',
-            # value字段可以指定默认值
-            'value': '0',
-            'options': [{
-                'key': '0',
-                'label': '收入'
-            }, {
-                'key': '1',
-                'label': '支出'
-            }]
-        }, {
-            'type': 'number',
-            'key': 'money',
-            'label': '金额',
-            # 设置默认值
-            'value': 1000
-        }, {
-            'type': 'date',
-            'key': 'date',
-            'label': '日期',
-        }, {
-            'type': 'datetime',
-            'key': 'datetime',
-            'label': '时间',
-        }, {
-            'type': 'rate',
-            'key': 'star',
-            'label': '评价等级'
-        }, {
-            'type': 'color',
-            'key': 'color',
-            'label': '颜色'
-        }, {
-            'type': 'slider',
-            'key': 'slider',
-            'label': '滑块'
-        }, {
-            'type': 'switch',
-            'key': 'switch',
-            'label': 'switch开关'
-        }, {
-            'type': 'input_number',
-            'key': 'input_number',
-            'label': 'input number'
-        }, {
-            'type': 'checkbox',
-            'key': 'checkbox',
-            # 必须指定默认值
-            'value': [],
-            'label': '复选框',
-            'options': [{
-                'key': '0',
-                'label': '收入'
-            }, {
-                'key': '1',
-                'label': '支出'
-            }, {
-                'key': '2',
-                'label': '收益'
-            }]
-        }, {
-            'type': 'radio',
-            'key': 'radio',
-            'label': '单选框',
-            'options': [{
-                'key': '0',
-                'label': '收入'
-            }, {
-                'key': '1',
-                'label': '支出'
-            }, {
-                'key': '2',
-                'label': '收益'
-            }]
-        }]
-    }
 
 #网络连接检测显示
 class outgonging_detection(admin.ModelAdmin):
