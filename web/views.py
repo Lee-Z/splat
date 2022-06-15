@@ -136,6 +136,7 @@ def obtain(request):
     res = requests.post(url,params=new_json,headers=headers)
     # print(res.text)
     data_dic = json.loads(res.text)
+    # list_all_dict   字典镶嵌字典遍历 {a:{b:c,d:e}},并写入数据库，上面定义函数
     list_all_dict(data_dic,ip,path)
     return HttpResponse("200")
 
@@ -164,11 +165,12 @@ def contrast(request):
     data_dic = json.loads(res.text)
     dbfile = []
     scanfile = []
-    isip = models.file_md5.objects.filter(file_serverip=ip).all()
+    isip = models.file_md5.objects.filter(file_serverip=ip,file_scanpath=path).values('file_url')
     if isip:
         print("ippand 不为空")
         # 查询数据库中所有文件
-        allfile = models.file_md5.objects.values('file_url')
+        # allfile = models.file_md5.objects.values('file_url')
+        allfile = models.file_md5.objects.filter(file_serverip=ip,file_scanpath=path).values('file_url')
         for i in allfile:
             dbfile.append(i['file_url'])
         if isinstance(data_dic, dict):  # 使用isinstance检测数据类型
