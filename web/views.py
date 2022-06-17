@@ -155,8 +155,8 @@ def contrast(request):
     path = project_scanpath[0]['project_scanpath']
     special = project_special[0]['project_special']
     ip = project_ip[0]['project_ip']
-    print(json_receive)
-    print("你点击了%s"%project_ip[0]['project_ip'])
+    # print(json_receive)
+    # print("你点击了%s"%project_ip[0]['project_ip'])
     headers = {'Content-Type': 'application/json'}
     url = "http://%s:8280/maintain/getMd5files" % (ip)
     new_json = {
@@ -165,6 +165,7 @@ def contrast(request):
     res = requests.post(url,params=new_json,headers=headers)
     # print(res.text)
     data_dic = json.loads(res.text)
+    # print(data_dic)
     dbfile = []
     scanfile = []
     isip = models.file_md5.objects.filter(file_serverip=ip,file_scanpath=path).values('file_url')
@@ -186,7 +187,8 @@ def contrast(request):
                     print("文件存在")
                     ismd5 = models.file_md5.objects.filter(file_filemd5=temp_value['MD5']).all()
                     if ismd5:
-                        print("文件正常")
+                        # print("文件正常")
+                        pass
                     else:
                         print("文件被修改 %s" % temp_value['路径'])
                         models.change_file.objects.create(change_name=project_name, change_ip=project_ip,
@@ -717,8 +719,125 @@ def port(queryset):
 
 #定时调用文件完整性扫描
 def md5file(w):
-    print("点击了定时异常扫描选项")
-    print(w)
+    for e in w:
+        pro_ip = (models.Active_ip.objects.filter(id=e).values_list('ip'))
+        cro_state = models.cron_info.objects.filter(cron_ip=pro_ip[0][0]).values('cron_stat')
+        for item in cro_state:
+            if item['cron_stat'] == 0:
+                print(cro_state[0]['cron_stat'])
+                ip = pro_ip[0][0]
+                all_scanpath = models.project_info.objects.filter(project_ip=ip).values('project_scanpath')
+                for path in all_scanpath:
+                    exfile = models.project_info.objects.filter(project_ip=ip,project_scanpath=path['project_scanpath']).values('project_special')
+                    project_name = models.project_info.objects.filter(project_ip=ip,project_scanpath=path['project_scanpath']).values('project_name')
+                    #排除文件后缀
+                    special = exfile[0]['project_special']
+
+                    headers = {'Content-Type': 'application/json'}
+                    url = "http://%s:8280/maintain/getMd5files" % (ip)
+                    new_json = {
+                        'param': path['project_scanpath'] + '&&&' + '[' + special + ']',
+                    }
+                    res = requests.post(url, params=new_json, headers=headers)
+                    print("+++++++++++++++++++++++++++++")
+                    # print(res.text)
+                    data_dic = json.loads(res.text)
+                    dbfile = []
+                    scanfile = []
+                    isip = models.file_md5.objects.filter(file_serverip=ip, file_scanpath=path['project_scanpath']).values('file_url')
+                    if isip:
+                        print("ippand 不为空")
+                        # 查询数据库中所有文件
+                        # allfile = models.file_md5.objects.values('file_url')
+                        allfile = models.file_md5.objects.filter(file_serverip=ip, file_scanpath=path['project_scanpath']).values('file_url')
+                        for i in allfile:
+                            dbfile.append(i['file_url'])
+                        if isinstance(data_dic, dict):  # 使用isinstance检测数据类型
+                            for x in range(len(data_dic)):
+                                # global scanfile
+                                temp_key = list(data_dic.keys())[x]
+                                temp_value = data_dic[temp_key]
+                                scanfile.append(temp_value['路径'])
+                                ispath = models.file_md5.objects.filter(file_url=temp_value['路径']).all()
+                                if ispath:
+                                    # print("文件存在")
+                                    ismd5 = models.file_md5.objects.filter(file_filemd5=temp_value['MD5']).all()
+                                    if ismd5:
+                                        # print("文件正常")
+                                        pass
+                                    else:
+                                        print("文件被修改 %s" % temp_value['路径'])
+                                        models.change_file.objects.create(change_name=project_name, change_ip=ip,
+                                                                          change_url=temp_value['路径'], change_state='2',
+                                                                          change_updatetime=temp_value['创建时间'])
+                                        headers = {'Content-Type': 'application/json',
+                                                   'fileName': temp_value['路径']
+                                                   }
+                                        url = "http://%s:8280/maintain/download" % (ip)
+                                        res = requests.post(url, headers=headers)
+                                        # print(res.text)
+                                        # 文件名称
+                                        host_ini = os.path.basename(temp_value['路径'])
+                                        # 获取文件路径
+                                        directory = os.path.dirname(temp_value['路径'])
+                                        hostpath = '/opt/msyd_scan/server/data/'
+                                        print(ip)
+                                        # 存在全路径拼接
+                                        # allpath = os.path.join(hostpath,ip,directory)
+                                        allpath = hostpath + ip + directory
+                                        if not os.path.exists(allpath): os.makedirs(allpath)
+                                        # filename = 'C:\iso\%s' % host_ini
+                                        filename = '%s/%s' % (allpath, host_ini)
+                                        print(filename)
+                                        with open(filename, 'wb') as file:
+                                            file.write(res.content)
+                                else:
+                                    print("文件为新增 %s" % temp_value['路径'])
+                                    models.change_file.objects.create(change_name=project_name, change_ip=ip,
+                                                                      change_url=temp_value['路径'], change_state='1',
+                                                                      change_updatetime=temp_value['创建时间'])
+                                    headers = {'Content-Type': 'application/json',
+                                               'fileName': temp_value['路径']
+                                               }
+                                    url = "http://%s:8280/maintain/download" % (ip)
+                                    res = requests.post(url, headers=headers)
+                                    # print(res.text)
+                                    host_ini = os.path.basename(temp_value['路径'])
+                                    # 获取文件路径
+                                    directory = os.path.dirname(temp_value['路径'])
+                                    hostpath = '/opt/msyd_scan/server/data/'
+                                    print(ip)
+                                    # 存在全路径拼接
+                                    # allpath = os.path.join(hostpath,ip,directory)
+                                    allpath = hostpath + ip + directory
+                                    if not os.path.exists(allpath): os.makedirs(allpath)
+                                    # filename = 'C:\iso\%s' % host_ini
+                                    filename = '%s/%s' % (allpath, host_ini)
+                                    # filename = 'C:\iso\%s' % host_ini
+                                    with open(filename, 'wb') as file:
+                                        file.write(res.content)
+                        # 将数据库文件 与 扫描出来的文件相减
+                        dbfile = [i for i in dbfile if i not in scanfile]
+                        for file in dbfile:
+                            models.change_file.objects.create(change_name=project_name, change_ip=ip,
+                                                              change_url=file, change_state='3',
+                                                              change_updatetime=temp_value['创建时间'])
+                    else:
+                        print("该ip未扫描")
+
+
+        else:
+            print("任务计划未开启")
+
+        # if uip[0][0]:
+        #     for i in uip:
+        #         allfile = models.file_md5.objects.filter(file_serverip=i).values('file_url')
+        #         print(allfile)
+        # else:
+        #     print("该ip未在文件完整性中添加")
+        print(pro_ip[0][0])
+        print("点击了定时异常扫描选项")
+
 
 #定时调用服务器进程扫描
 def process(queryset):
