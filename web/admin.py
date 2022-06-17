@@ -258,6 +258,7 @@ class Agent(AjaxAdmin):
             # 显示的文本
             'label': '服务器ip',
             # 为空校验，默认为False
+            'size': 'mini',
             'require': True
         },{
             # 这里的type 对应el-input的原生input属性，默认为input
