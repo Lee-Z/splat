@@ -52,7 +52,7 @@ class Agent(AjaxAdmin):
             elif status_id[0][0] == 1:
                 messages.add_message(request, messages.SUCCESS, "已在线状态")
             else:
-                messages.add_message(request, messages.SUCCESS, "离线状态")
+                messages.add_message(request, messages.SUCCESS, "非未注册状态")
     # 显示的文本，与django admin一致
     custom_button.short_description = '注册'
     # icon，参考element-ui icon与https://fontawesome.com
@@ -213,14 +213,19 @@ class Agent(AjaxAdmin):
             'password':password
         }
         res = requests.post(url, json=new_json)
-        # print(res.text)
-
-        # post中的_action 是方法名
-        # post中 _selected 是选中的数据，逗号分割
-        return JsonResponse(data={
-            'status': 'success',
-            'msg': '处理成功！'
-        })
+        print(res.text)
+        if "500" in res.text:
+            return JsonResponse(data={
+                'status': 'error',
+                'msg': '填写错误'
+            })
+        else:
+            # post中的_action 是方法名
+            # post中 _selected 是选中的数据，逗号分割
+            return JsonResponse(data={
+                'status': 'success',
+                'msg': '处理成功！'
+            })
 
     layer_input.short_description = 'Agent安装'
     layer_input.type = 'success'

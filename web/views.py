@@ -34,6 +34,8 @@ from IPy import IP
 import geoip2.database
 from django.shortcuts import render
 import paramiko
+import getpass
+
 
 def cronpage(request):
 
@@ -770,12 +772,12 @@ def extnetwork(request):
             print(aip[0][0])
             url = "http://%s:8280/maintain/telnet" % (aip[0][0])
             res = requests.post(url, data=data)
-            if 'Escape' in res.text:
-                netlist.append(
-                    models.expnetwork_info(expnetwork_ip=aip[0][0], expnetwork_stat="0",expnetwork_purpose=netaddress))
-            else:
+            if 'timed out' in res.text:
                 netlist.append(
                     models.expnetwork_info(expnetwork_ip=aip[0][0], expnetwork_stat="1",expnetwork_purpose=netaddress))
+            else:
+                netlist.append(
+                    models.expnetwork_info(expnetwork_ip=aip[0][0], expnetwork_stat="0",expnetwork_purpose=netaddress))
     models.expnetwork_info.objects.bulk_create(netlist)
     return HttpResponse("200")
 
@@ -783,6 +785,8 @@ def addextpage(request):
     # return render(request, 'dashboard.html',context)
     # print(request.META.get('REMOTE_ADDR'))
     return render(request, 'addpage.html')
+
+
 
 
 #远程安装客户端接口
@@ -809,5 +813,9 @@ def SshConnect(request):
         print(stderr.read().decode())
         # 关闭连接
         ssh.close()
+        models.Active_ip.objects.create(ip=serverip,state=1)
+
+
+
         return HttpResponse('200')
 

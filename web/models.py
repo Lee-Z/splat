@@ -93,7 +93,7 @@ class Active_ip(models.Model):
         return self.ip
     class Meta:
         verbose_name = '客户端列表'
-        verbose_name_plural = '客户端列表'
+        verbose_name_plural = '客户端'
     # 在每列后面添加单个按钮
     # def pass_audit_str2(self):
     #     # parameter_str = 'id={}&status={}'.format(str(self.id), str(self.status))
